@@ -13,7 +13,7 @@ export const Cart = () => {
   }, []);
 
   const getPlants = async () => {
-    const response = await supabase.from("plant").select("*").eq("id", 2);
+    const response = await supabase.from("plant").select("*").limit(7);
 
     if (response.error) {
       console.log(response.error);
@@ -26,6 +26,9 @@ export const Cart = () => {
   //   let imgData = plants[0].details_img;
   //   console.log(imgData.fi)
   // }
+  if (plants) {
+    console.log(plants[0]);
+  }
 
   return (
     <>
