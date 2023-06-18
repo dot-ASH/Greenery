@@ -14,7 +14,7 @@ import {
   Image,
   Modal,
   Switch,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { myColors } from "../styles/Colors";
 import { supabase } from "../data/Supabase";
@@ -32,6 +32,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { CustomAlert } from "../styles/CustomAlert";
 import GestureRecognizer from "react-native-swipe-gestures";
+import { FILE_NAME } from "@env";
 
 if (
   Platform.OS === "android" &&
@@ -56,7 +57,6 @@ export const Product = ({ route }) => {
       setPlant(response?.data[0]);
     }
   }
-
   useEffect(() => {
     getPlant();
   }, []);
@@ -81,7 +81,6 @@ export const Product = ({ route }) => {
           ></Image>
         </View>
         <ScrollView style={styles.product}>
-          <View style={{height: "100%", width:"100%", backgroundColor: myColors.light, borderColor:"black"}}></View>
           {/* <View style={styles.settingSection}>
             {settings.map((item, key) => {
               if (item.id <= 2) {
@@ -236,11 +235,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
-    paddingBottom: 80
+    paddingBottom: 80,
   },
   product: {
+    backgroundColor: myColors.light,
     flex: 1,
-    marginTop: -10,
+    marginTop: -20,
     zIndex: 800,
     width: Dimensions.get("window").width,
     borderRadius: 30,
@@ -261,6 +261,6 @@ const styles = StyleSheet.create({
   },
   img: {
     width: "100%",
-    height:500
+    height: 500,
   },
 });
