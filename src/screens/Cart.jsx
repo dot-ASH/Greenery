@@ -9,7 +9,6 @@ export const Cart = () => {
 
   useEffect(() => {
     getPlants();
-    // console.log(plants[0].details_img[0])
   }, []);
 
   const getPlants = async () => {
@@ -21,14 +20,6 @@ export const Cart = () => {
       setPlants(response.data);
     }
   };
-
-  // const moreImg = () =>{
-  //   let imgData = plants[0].details_img;
-  //   console.log(imgData.fi)
-  // }
-  if (plants) {
-    console.log(plants[0]);
-  }
 
   return (
     <>

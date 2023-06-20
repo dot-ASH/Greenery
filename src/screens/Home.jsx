@@ -113,7 +113,7 @@ export const Home = ({ navigation }) => {
               {userData && userData.avatar_url ? (
                 <Image
                   source={userData.avatar_url}
-                  style={{ flex: 1, justifyContent: "center" }}
+                  style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
                   contentFit="cover"
                   transition={1000}
                 ></Image>
@@ -121,7 +121,7 @@ export const Home = ({ navigation }) => {
                 <FontAwesomeIcon
                   icon={faUserTie}
                   size={24}
-                  style={{ color: myColors.light }}
+                  style={{ color: myColors.light, margin: 23 }}
                 />
               )}
             </TouchableOpacity>
@@ -383,6 +383,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     padding: 20,
+    backgroundColor: myColors.darkAlt,
   },
   contentText: {
     fontFamily: "lusitanaBold",
