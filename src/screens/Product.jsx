@@ -1,42 +1,36 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
-  Animated,
   View,
   SafeAreaView,
   Text,
   StyleSheet,
   StatusBar,
-  ImageBackground,
   Dimensions,
   LayoutAnimation,
   Platform,
   TouchableOpacity,
   UIManager,
-  Image,
-  Modal,
-  Switch,
   ScrollView,
+  Image,
 } from "react-native";
 import { myColors } from "../styles/Colors";
 import { supabase } from "../data/Supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
-  faAngleRight,
-  faBell,
+  faAngleLeft,
   faCartPlus,
+  faCat,
+  faCheck,
   faDollarSign,
-  faKey,
-  faMap,
-  faNoteSticky,
-  faRightFromBracket,
-  faUpload,
-  faUser,
-  faXmark,
+  faDoorOpen,
+  faFileImage,
+  faFlag,
+  faSeedling,
+  faHeart as faHeartSolid,
 } from "@fortawesome/free-solid-svg-icons";
-import { CustomAlert } from "../styles/CustomAlert";
-import GestureRecognizer from "react-native-swipe-gestures";
-import { FILE_NAME } from "@env";
-import { faHeart } from "@fortawesome/free-regular-svg-icons";
+import { faHeart, faSun } from "@fortawesome/free-regular-svg-icons";
+import { BackHandler } from "react-native";
+import { CheckBox } from "react-native-elements";
 
 if (
   Platform.OS === "android" &&
@@ -45,32 +39,89 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export const Product = ({ route }) => {
+export const Product = ({ navigation, route }) => {
+  const [userId, setUserId] = useState();
   const [plant, setPlant] = useState({});
   const [margin, setMargin] = useState(-20);
   const scrollViewRef = useRef();
   const [scrollY, setScrollY] = useState(0);
   const [elavatedBg, setElavatedBg] = useState(false);
+  const [alreadyAdded, setAlreadyAdded] = useState(false);
+  const [liked, setLiked] = useState(false);
+
+  const getUID = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      return data.session.user.id;
+    }
+  };
+
+  async function getUsers() {
+    let id = await getUID();
+    const response = await supabase
+      .from("users")
+      .select(`*`)
+      .eq("username", id);
+
+    if (response.error) {
+      console.log(response.error);
+    } else {
+      setUserId(response?.data[0]);
+    }
+  }
+
+  useEffect(() => {
+    getUsers();
+    checkCart();
+  }, []);
+
+  useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      if (elavatedBg === false) {
+        return;
+      }
+      e.preventDefault();
+    });
+  }, [navigation, elavatedBg]);
+
+  useEffect(() => {
+    getPlant();
+    shrinkFull();
+    setLiked(false);
+    checkCart();
+  }, [navigation, route.params.id]);
 
   async function getPlant() {
     const response = await supabase
       .from("plant")
       .select(`*`)
       .eq("id", route.params.id);
-
     if (response.error) {
       console.log(response.error);
     } else {
-
       setPlant(response?.data[0]);
     }
   }
 
-  const getAnimation = () => {
-    LayoutAnimation.configureNext({
-      duration: 50,
-      create: { type: "easeIn", property: "opacity" },
-    });
+  const checkCart = async () => {
+    const response = await supabase
+      .from("cart")
+      .select("*")
+      .eq("user_id", userId?.id)
+      .eq("product_id", route.params.id);
+    if (!response.error) {
+      if (response.data.length > 0) {
+        setAlreadyAdded(true);
+      } else {
+        setAlreadyAdded(false);
+      }
+    }
+  };
+
+  const shrinkFull = () => {
+    setElavatedBg(false);
+    setMargin(-20);
+    setScrollY(0);
   };
 
   const handleScroll = (event) => {
@@ -79,15 +130,25 @@ export const Product = ({ route }) => {
     if (scrollY > 200) {
       setElavatedBg(true);
       setMargin(-330);
-    } else {
-      setElavatedBg(false);
-      setMargin(-20);
+      BackHandler.addEventListener("hardwareBackPress", shrinkFull);
     }
   };
 
-  useEffect(() => {
-    getPlant();
-  }, []);
+  const addToCart = async () => {
+    const { data, error } = await supabase
+      .from("cart")
+      .insert([{ product_id: route.params.id, user_id: userId.id }]);
+
+    if (!error) {
+      setAlreadyAdded(true);
+    } else {
+      console.log(error);
+    }
+  };
+
+  const likedPro = () => {
+    setLiked(true);
+  };
 
   return (
     <>
@@ -99,6 +160,21 @@ export const Product = ({ route }) => {
       />
 
       <SafeAreaView style={styles.container}>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: 60,
+            left: 30,
+            zIndex: 4000,
+          }}
+          onPress={() => navigation.push("Drawerstack")}
+        >
+          <FontAwesomeIcon
+            size={24}
+            icon={faAngleLeft}
+            style={{ color: myColors.dark }}
+          />
+        </TouchableOpacity>
         <View style={styles.profileBanner}>
           {elavatedBg ? <View style={styles.elavatedbg}></View> : null}
           <Image
@@ -136,156 +212,232 @@ export const Product = ({ route }) => {
             onScroll={handleScroll}
             scrollEventThrottle={160}
           >
-            <View style={styles.plantDes}>
-              <Text style={{color: "white", fontFamily: "lusitanaBold", fontSize: 18}}>{plant && plant.plant_description}</Text>
-            </View>
-            <View
-              style={[styles.quickInfo]}
-            >
-              <View
-                style={{
-                  padding: 15,
-                  width: 75,
-                  borderRadius: 10,
-                  backgroundColor: myColors.lightAlt,
-                  flexDirection: "column",
-                  gap: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 10,
-                }}
-              >
-                <FontAwesomeIcon
-                  size={20}
-                  icon={faDollarSign}
-                  style={{ color: myColors.dark }}
-                />
+            <View style={{ width: "99%" }}>
+              <View style={styles.plantDes}>
                 <Text
                   style={{
-                    color: myColors.dark,
+                    color: "white",
                     fontFamily: "lusitanaBold",
-                    fontSize: 20,
+                    fontSize: 18,
                   }}
                 >
-                  {plant && plant.price}
+                  {plant && plant.plant_description}
                 </Text>
               </View>
               <View
-                style={{
-                  padding: 15,
-                  width: 75,
-                  borderRadius: 10,
-                  backgroundColor: myColors.lightAlt,
-                  flexDirection: "column",
-                  gap: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 10,
-                }}
+                style={[styles.quickInfo, { justifyContent: "space-between" }]}
+              >
+                <View
+                  style={{
+                    padding: 15,
+                    borderRadius: 10,
+                    backgroundColor: myColors.lightAlt,
+                    flexDirection: "column",
+                    gap: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 10,
+                  }}
+                >
+                  <FontAwesomeIcon
+                    size={20}
+                    icon={faDollarSign}
+                    style={{ color: myColors.dark }}
+                  />
+                  <Text
+                    style={{
+                      color: myColors.dark,
+                      fontFamily: "lusitanaBold",
+                      fontSize: 18,
+                    }}
+                  >
+                    {plant && plant.price}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    padding: 15,
+                    borderRadius: 10,
+                    backgroundColor: myColors.lightAlt,
+                    flexDirection: "column",
+                    gap: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 10,
+                  }}
+                >
+                  <FontAwesomeIcon
+                    size={20}
+                    icon={faDoorOpen}
+                    style={{ color: myColors.dark }}
+                  />
+                  <Text
+                    style={{
+                      color: myColors.dark,
+                      fontFamily: "lusitanaBold",
+                      fontSize: 18,
+                    }}
+                  >
+                    {plant && plant.plant_type}
+                  </Text>
+                </View>
+                <View
+                  style={{
+                    padding: 15,
+                    borderRadius: 10,
+                    backgroundColor: myColors.lightAlt,
+                    flexDirection: "column",
+                    gap: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 10,
+                  }}
+                >
+                  <FontAwesomeIcon
+                    size={20}
+                    icon={faSun}
+                    style={{ color: myColors.dark }}
+                  />
+                  <Text
+                    style={{
+                      color: myColors.dark,
+                      fontFamily: "lusitanaBold",
+                      fontSize: 18,
+                    }}
+                  >
+                    {plant && plant.sun_exposure ? "full-sun" : "low-light"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={[styles.quickInfo, {}]}>
+                <View
+                  style={{
+                    padding: 15,
+                    borderRadius: 10,
+                    backgroundColor: myColors.lightAlt,
+                    flexDirection: "column",
+                    gap: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 10,
+                  }}
+                >
+                  <FontAwesomeIcon
+                    size={20}
+                    icon={faCat}
+                    style={{ color: myColors.dark }}
+                  />
+                  <Text
+                    style={{
+                      color: myColors.dark,
+                      fontFamily: "lusitanaBold",
+                      fontSize: 18,
+                    }}
+                  >
+                    {plant && plant.toxicity}
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    padding: 15,
+                    borderRadius: 10,
+                    backgroundColor: myColors.lightAlt,
+                    flexDirection: "column",
+                    gap: 10,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    elevation: 10,
+                  }}
+                >
+                  <FontAwesomeIcon
+                    size={20}
+                    icon={faSeedling}
+                    style={{ color: myColors.dark }}
+                  />
+                  <Text
+                    style={{
+                      color: myColors.dark,
+                      fontFamily: "lusitanaBold",
+                      fontSize: 18,
+                    }}
+                  >
+                    {plant && plant.soil_type}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={[
+                  styles.plantDes,
+                  { flexDirection: "row", gap: 10, alignItems: "center" },
+                ]}
               >
                 <FontAwesomeIcon
-                  size={20}
-                  icon={faDollarSign}
-                  style={{ color: myColors.dark }}
+                  icon={faFlag}
+                  style={{ color: myColors.highText }}
                 />
                 <Text
                   style={{
-                    color: myColors.dark,
+                    color: "white",
                     fontFamily: "lusitanaBold",
-                    fontSize: 20,
+                    fontSize: 18,
                   }}
                 >
-                  {plant && plant.price}
+                  However, The plant {plant && plant.plant_care}.
                 </Text>
               </View>
 
-              <View
-                style={{
-                  padding: 15,
-                  width: 75,
-                  borderRadius: 10,
-                  backgroundColor: myColors.lightAlt,
-                  flexDirection: "column",
-                  gap: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 10,
-                }}
-              >
-                <FontAwesomeIcon
-                  size={20}
-                  icon={faDollarSign}
-                  style={{ color: myColors.dark }}
-                />
-                <Text
+              <View style={styles.sectionHeader}>
+                <View
                   style={{
-                    color: myColors.dark,
-                    fontFamily: "lusitanaBold",
-                    fontSize: 20,
+                    flexDirection: "row",
+                    gap: 20,
+                    alignItems: "center",
                   }}
                 >
-                  {plant && plant.price}
-                </Text>
-              </View>
-              <View
-                style={{
-                  padding: 15,
-                  width: 75,
-                  borderRadius: 10,
-                  backgroundColor: myColors.lightAlt,
-                  flexDirection: "column",
-                  gap: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 10,
-                }}
-              >
-                <FontAwesomeIcon
-                  size={20}
-                  icon={faDollarSign}
-                  style={{ color: myColors.dark }}
-                />
-                <Text
-                  style={{
-                    color: myColors.dark,
-                    fontFamily: "lusitanaBold",
-                    fontSize: 20,
-                  }}
-                >
-                  {plant && plant.price}
-                </Text>
-              </View>
-            
-            </View>
+                  <FontAwesomeIcon
+                    icon={faFileImage}
+                    style={{ color: myColors.lightAlt }}
+                  />
+                  <Text
+                    style={{
+                      color: myColors.lightAlt,
+                      fontFamily: "lusitanaBold",
+                      fontSize: 20,
+                    }}
+                  >
+                    More images
+                  </Text>
+                </View>
 
-            <View style={[styles.quickInfo, {}]}>
-              <View
-                style={{
-                  padding: 15,
-                  width: 75,
-                  borderRadius: 10,
-                  backgroundColor: myColors.lightAlt,
-                  flexDirection: "column",
-                  gap: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  elevation: 10,
-                }}
-              >
-                <FontAwesomeIcon
-                  size={20}
-                  icon={faDollarSign}
-                  style={{ color: myColors.dark }}
-                />
-                <Text
-                  style={{
-                    color: myColors.dark,
-                    fontFamily: "lusitanaBold",
-                    fontSize: 20,
-                  }}
-                >
-                  {plant && plant.price}
-                </Text>
+                <View style={styles.imageContainer}>
+                  {plant.details_img
+                    ? plant.details_img.map((item, key) => {
+                        return (
+                          <View
+                            style={{
+                              height: 250,
+                              flex: 0.5,
+                              borderRadius: 15,
+                              overflow: "hidden",
+                              elevation: 10,
+                            }}
+                            key={key}
+                          >
+                            <Image
+                              source={{
+                                uri: item,
+                              }}
+                              contentFit="cover"
+                              transition={1000}
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          </View>
+                        );
+                      })
+                    : null}
+                </View>
               </View>
             </View>
           </ScrollView>
@@ -303,14 +455,17 @@ export const Product = ({ route }) => {
               paddingHorizontal: 5,
               gap: 20,
               borderColor: myColors.dark,
-              borderWidth: 1
+              borderWidth: 1,
             }}
           >
-            <TouchableOpacity>
+            <TouchableOpacity onPress={likedPro}>
               <FontAwesomeIcon
                 size={26}
-                icon={faHeart}
-                style={{ marginLeft: 20, color: myColors.dark }}
+                icon={liked ? faHeartSolid : faHeart}
+                style={{
+                  marginLeft: 20,
+                  color: liked ? myColors.errorText : myColors.dark,
+                }}
               ></FontAwesomeIcon>
             </TouchableOpacity>
             <TouchableOpacity
@@ -325,9 +480,10 @@ export const Product = ({ route }) => {
                 padding: 10,
                 width: "80%",
               }}
+              onPress={() => addToCart()}
             >
               <FontAwesomeIcon
-                icon={faCartPlus}
+                icon={alreadyAdded ? faCheck : faCartPlus}
                 size={26}
                 style={{ color: myColors.light }}
               />
@@ -338,7 +494,7 @@ export const Product = ({ route }) => {
                   color: myColors.light,
                 }}
               >
-                Add to Cart
+                {alreadyAdded ? "Added to the Cart" : "Add to Cart"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -453,12 +609,29 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width,
     zIndex: 2000,
   },
-  plantDes:{
+  plantDes: {
     backgroundColor: myColors.lightGreen,
     elevation: 10,
     marginHorizontal: 20,
     borderRadius: 10,
     padding: 15,
     marginVertical: 10,
-  }
+  },
+  imageContainer: {
+    flex: 1,
+    width: "100%",
+    flexDirection: "row",
+    gap: 10,
+    padding: 20,
+  },
+  sectionHeader: {
+    backgroundColor: myColors.darkAlt,
+    elevation: 10,
+    marginHorizontal: 20,
+    borderRadius: 15,
+    paddingVertical: 15,
+    marginVertical: 10,
+    alignItems: "center",
+    textAlign: "center",
+  },
 });

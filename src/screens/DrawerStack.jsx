@@ -48,27 +48,27 @@ export const DrawerStack = ({ navigation, route }) => {
         <Stack.Screen
           name="Home"
           component={Home}
-          options={{ presentation: "modal" }}
+
         />
         <Stack.Screen
           name="Search"
           component={Search}
-          options={{ presentation: "modal" }}
+  
         />
         <Stack.Screen
           name="Cart"
           component={Cart}
-          options={{ presentation: "modal" }}
+ 
         />
         <Stack.Screen
           name="Saved"
           component={Saved}
-          options={{ presentation: "modal" }}
+
         />
         <Stack.Screen
           name="Profile"
           component={Profile}
-          options={{ presentation: "modal" }}
+
         />
       </Stack.Navigator>
       <View style={styles.navbar}>

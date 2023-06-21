@@ -89,13 +89,13 @@ export default function App() {
         <Stack.Screen
           name="Welcome"
           component={Welcome}
-          options={{ presentation: "modal", headerLeft: null }}
+          options={{  headerLeft: null }}
         />
         <Stack.Screen
           name="Login"
           component={Login}
           options={{
-            presentation: "modal",
+
             headerLeft: null,
             gestureEnabled: false,
           }}
@@ -104,30 +104,31 @@ export default function App() {
         <Stack.Screen
           name="Reg"
           component={Registration}
-          options={{ presentation: "modal" }}
+
         />
         <Stack.Screen
           name="Drawerstack"
           component={DrawerStack}
-          options={{ presentation: "modal" }}
+  
           initialParams={{ active: "Home" }}
         />
         <Stack.Screen
           name="postSignup"
           component={PostSignup}
-          options={{ presentation: "modal" }}
+  
           initialParams={{ active: "Home" }}
         />
          <Stack.Screen
           name="notifi"
           component={Notification}
-          options={{ presentation: "modal" }}
+   
           // initialParams={{ active: "Home" }}
         />
         <Stack.Screen
           name="product"
           component={Product}
-          options={{ presentation: "modal" }}
+          options={{ presentation: "modal", gestureEnabled: false }}
+  
           // initialParams={{ active: "Home" }}
         />
       </Stack.Navigator>

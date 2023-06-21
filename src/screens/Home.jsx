@@ -224,10 +224,13 @@ export const Home = ({ navigation }) => {
                               transition={1000}
                             >
                               <TouchableOpacity
-                                onPress={() =>
+                                onPress={() =>{
+                                   console.log(item.id);
                                   navigation.navigate("product", {
                                     id: item.id,
                                   })
+                                }
+                                 
                                 }
                               >
                                 <Text style={styles.contentText}>
