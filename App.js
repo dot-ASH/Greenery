@@ -121,15 +121,11 @@ export default function App() {
          <Stack.Screen
           name="notifi"
           component={Notification}
-   
-          // initialParams={{ active: "Home" }}
         />
         <Stack.Screen
           name="product"
           component={Product}
-          options={{ presentation: "modal", gestureEnabled: false }}
   
-          // initialParams={{ active: "Home" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

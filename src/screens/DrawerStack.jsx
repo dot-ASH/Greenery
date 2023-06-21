@@ -22,9 +22,13 @@ import {
 import { Saved } from "./Saved";
 import { Cart } from "./Cart";
 import { Search } from "./Search";
+import { supabase } from "../data/Supabase";
 
 export const DrawerStack = ({ navigation, route }) => {
   const [activeScreen, setActiveScreen] = useState("");
+  const [userId, setUserId] = useState();
+  const [alreadyAdded, setAlreadyAdded] = useState(false);
+  const [cartCount, setCartCount] = useState();
 
   useEffect(() => {
     if (route.params.active) {
@@ -38,6 +42,47 @@ export const DrawerStack = ({ navigation, route }) => {
     setActiveScreen(screen);
   };
 
+  const getUID = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    if (data.session?.user) {
+      return data.session.user.id;
+    }
+  };
+
+  async function getUsers() {
+    let id = await getUID();
+    const response = await supabase
+      .from("users")
+      .select(`*`)
+      .eq("username", id);
+
+    if (response.error) {
+      console.log(response.error);
+    } else {
+      setUserId(response?.data[0]);
+    }
+  }
+
+  useEffect(() => {
+    getUsers();
+    checkCart();
+  }, []);
+
+  const checkCart = async () => {
+    const response = await supabase
+      .from("cart")
+      .select("*")
+      .eq("user_id", userId?.id);
+    if (!response.error) {
+      if (response.data.length > 0) {
+        setAlreadyAdded(true);
+        setCartCount(response.data.length);
+      } else {
+        setAlreadyAdded(false);
+      }
+    }
+  };
+
   const Stack = createNativeStackNavigator();
   return (
     <>
@@ -45,31 +90,11 @@ export const DrawerStack = ({ navigation, route }) => {
         initialRouteName={"Home"}
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen
-          name="Home"
-          component={Home}
-
-        />
-        <Stack.Screen
-          name="Search"
-          component={Search}
-  
-        />
-        <Stack.Screen
-          name="Cart"
-          component={Cart}
- 
-        />
-        <Stack.Screen
-          name="Saved"
-          component={Saved}
-
-        />
-        <Stack.Screen
-          name="Profile"
-          component={Profile}
-
-        />
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Search" component={Search} />
+        <Stack.Screen name="Cart" component={Cart} />
+        <Stack.Screen name="Saved" component={Saved} />
+        <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
       <View style={styles.navbar}>
         <View style={styles.navContent}>
@@ -117,6 +142,7 @@ export const DrawerStack = ({ navigation, route }) => {
                 : styles.secondaryBtn
             }
           >
+  
             <FontAwesomeIcon
               size={26}
               icon={faCartShopping}
@@ -177,7 +203,7 @@ const styles = StyleSheet.create({
   navbar: {
     alignSelf: "center",
     position: "absolute",
-    width: Dimensions.get("window").width-20,
+    width: Dimensions.get("window").width - 20,
     bottom: 0,
     marginBottom: 5,
     height: 65,

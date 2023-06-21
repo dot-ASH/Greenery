@@ -73,7 +73,7 @@ export const Product = ({ navigation, route }) => {
   useEffect(() => {
     getUsers();
     checkCart();
-  }, []);
+  });
 
   useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
@@ -88,7 +88,6 @@ export const Product = ({ navigation, route }) => {
     getPlant();
     shrinkFull();
     setLiked(false);
-    checkCart();
   }, [navigation, route.params.id]);
 
   async function getPlant() {
