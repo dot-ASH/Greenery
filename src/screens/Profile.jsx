@@ -54,7 +54,6 @@ export const Profile = ({ navigation }) => {
 
   async function getUsers() {
     let id = await getUID();
-    console.log(id);
     const response = await supabase
       .from("users")
       .select(`*`)

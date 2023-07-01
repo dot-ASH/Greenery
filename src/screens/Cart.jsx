@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Component, useEffect, useRef, useState } from "react";
 import {
   Button,
   Dimensions,
@@ -9,25 +9,31 @@ import {
   Text,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { supabase } from "../data/Supabase";
 import { myColors } from "../styles/Colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faCheckDouble, faCircleMinus, faCirclePlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheckDouble,
+  faCircleMinus,
+  faCirclePlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { CheckBox } from "react-native-elements/dist/checkbox/CheckBox";
+import { addons } from "react-native";
 
 export const Cart = () => {
   const [plants, setPlants] = useState();
-  const [userData, setUserData] = useState();
+  const [orderedPlants, setOrderedPlants] = useState();
   const [showAlert, setShowAlert] = useState(false);
   const [updateValue, setUpdateValue] = useState(false);
   const [elavatedBg, setElavatedBg] = useState(false);
-
+  const [loading, setLoading] = useState({item: null,state:false});
+  const proCount = useRef(null);
+  // console.log(loading);
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
-    if (data.session?.user) {
-      return data.session.user.id;
-    }
+    if (data.session?.user) return data.session.user.id;
   };
 
   async function getUsers() {
@@ -36,63 +42,83 @@ export const Cart = () => {
       .from("users")
       .select(`*`)
       .eq("username", id);
-
-    if (response.error) {
-      console.log(response.error);
-    } else {
-      setUserData(response?.data[0]);
-    }
+    if (response.error) console.log(response.error);
+    else return response?.data[0];
   }
 
   useEffect(() => {
-    getUsers();
     getPlants();
-  }, []);
-
-  useEffect(() => {});
+  }, [plants]);
 
   const getPlants = async () => {
+    let userdata = await getUsers();
     const response = await supabase
       .from("cart")
       .select(
         "amount, id, totalAmount, check ,product_id(plant_name ,image_url, price)"
       )
-      .eq("user_id", 4);
+      .eq("user_id", userdata.id);
 
-    if (response.error) {
-      console.log(response.error);
-    } else {
-      setPlants(response.data);
-    }
+    if (response.error) console.log(response.error);
+    else setPlants(response.data);
   };
 
-  const minusPro = async (am, pr, itemId) => {
-    let totalPrice = (am - 1) * pr;
+  async function editOrder(action, cartId, price) {
+    setOrderedPlants(plants?.slice());
 
-    const { data, error } = await supabase
-      .from("cart")
-      .update([{ amount: am - 1, totalAmount: totalPrice }])
-      .eq("id", itemId);
+    let item = plants.filter((a) => a.id == cartId);
 
-    if (error) {
-      console.log(error);
+    if (action == "+") {
+      if (item.length > 0) {
+        setLoading({item: cartId});
+        let newQty = item[0].amount + 1;
+        let newPrice = newQty * price;
+        const { data, error } = await supabase
+          .from("cart")
+          .update([{ amount: newQty, totalAmount: newPrice }])
+          .eq("id", cartId);
+        if (error) {
+          console.log(error);
+        } else {
+          setLoading({item: null});
+        }
+      }
     } else {
-      console.log(totalPrice);
+      if (item.length > 0) {
+        if (item[0]?.amount > 0) {
+          let newQty = item[0].amount - 1;
+          if (newQty > 0) {
+            setLoading({item: cartId});
+            let newPrice = newQty * price;
+            const { data, error } = await supabase
+              .from("cart")
+              .update([{ amount: newQty, totalAmount: newPrice }])
+              .eq("id", cartId);
+            if (error) {
+              console.log(error);
+            } else {
+              setLoading({item: null});
+            }
+          } else {
+            const { error } = await supabase
+              .from("cart")
+              .delete()
+              .eq("id", cartId);
+          }
+        }
+      }
     }
-  };
+  }
 
-  const addPro = async (am, pr, itemId) => {
-    let totalPrice = (am + 1) * pr;
-    const { data, error } = await supabase
-      .from("cart")
-      .update([{ amount: am + 1, totalAmount: totalPrice }])
-      .eq("id", itemId);
-    if (error) {
-      console.log(error);
-    } else {
-      console.log(totalPrice);
+  plants?.sort((a, b) => b.id - a.id);
+
+  function getCartQty(cartId) {
+    let orderItem = plants?.filter((a) => a.id == cartId);
+    if (orderItem.length > 0) {
+      return orderItem[0].amount;
     }
-  };
+    return 1;
+  }
 
   return (
     <>
@@ -203,18 +229,25 @@ export const Cart = () => {
                               flex: 1,
                               justifyContent: "space-between",
                               alignItems: "center",
-                              paddingHorizontal: 20
+                              paddingHorizontal: 20,
                             },
                           ]}
                         >
-                          <Text
-                            style={{ fontFamily: "judsonBold", fontSize: 26 }}
-                          >
-                            ${" "}
-                            {item.totalAmount
-                              ? item.totalAmount
-                              : item.product_id.price}
-                          </Text>
+                          {loading.item === item.id ? (
+                            <ActivityIndicator
+                              size="small"
+                              color={myColors.dark}
+                            />
+                          ) : (
+                            <Text
+                              style={{ fontFamily: "judsonBold", fontSize: 26 }}
+                            >
+                              ${" "}
+                              {item.totalAmount
+                                ? item.totalAmount
+                                : item.product_id.price}
+                            </Text>
+                          )}
                           <View
                             style={{
                               flexDirection: "row",
@@ -224,11 +257,7 @@ export const Cart = () => {
                           >
                             <TouchableOpacity
                               onPress={() =>
-                                minusPro(
-                                  item.amount,
-                                  item.product_id.price,
-                                  item.id
-                                )
+                                editOrder("-", item.id, item.product_id.price)
                               }
                             >
                               <FontAwesomeIcon
@@ -237,18 +266,25 @@ export const Cart = () => {
                                 style={{ color: myColors.dark }}
                               />
                             </TouchableOpacity>
-                            <Text
-                              style={{ fontSize: 26, fontFamily: "judsonBold" }}
-                            >
-                              {item.amount}
-                            </Text>
+                            {loading.item === item.id ? (
+                              <ActivityIndicator
+                                size="small"
+                                color={myColors.dark}
+                              />
+                            ) : (
+                              <Text
+                                ref={proCount}
+                                style={{
+                                  fontSize: 26,
+                                  fontFamily: "judsonBold",
+                                }}
+                              >
+                                {getCartQty(item.id)}
+                              </Text>
+                            )}
                             <TouchableOpacity
                               onPress={() =>
-                                addPro(
-                                  item.amount,
-                                  item.product_id.price,
-                                  item.id
-                                )
+                                editOrder("+", item.id, item.product_id.price)
                               }
                             >
                               <FontAwesomeIcon
@@ -313,15 +349,23 @@ export const Cart = () => {
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "row",
-              gap: 20
+              gap: 20,
             }}
           >
-            <FontAwesomeIcon size={24} icon={faCheckDouble} style={{color: myColors.dark}}/>
-            <Text  style={{
+            <FontAwesomeIcon
+              size={24}
+              icon={faCheckDouble}
+              style={{ color: myColors.dark }}
+            />
+            <Text
+              style={{
                 fontFamily: "judsonBold",
                 fontSize: 26,
                 color: myColors.dark,
-              }}>Order Now!</Text>
+              }}
+            >
+              Order Now!
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

@@ -12,6 +12,7 @@ import {
   UIManager,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { myColors } from "../styles/Colors";
 import { supabase } from "../data/Supabase";
@@ -48,6 +49,7 @@ export const Product = ({ navigation, route }) => {
   const [elavatedBg, setElavatedBg] = useState(false);
   const [alreadyAdded, setAlreadyAdded] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -134,12 +136,14 @@ export const Product = ({ navigation, route }) => {
   };
 
   const addToCart = async () => {
+    setLoading(true);
     const { data, error } = await supabase
       .from("cart")
       .insert([{ product_id: route.params.id, user_id: userId.id }]);
 
     if (!error) {
       setAlreadyAdded(true);
+      setLoading(false);
     } else {
       console.log(error);
     }
@@ -186,6 +190,7 @@ export const Product = ({ navigation, route }) => {
             style={{
               width: "95%",
               height: 60,
+              marginTop: 10, 
               borderRadius: 20,
               backgroundColor: myColors.lightAlt,
               elevation: 20,
@@ -211,7 +216,7 @@ export const Product = ({ navigation, route }) => {
             onScroll={handleScroll}
             scrollEventThrottle={160}
           >
-            <View style={{ width: "99%" }}>
+            <View style={{ width: "100%" }}>
               <View style={styles.plantDes}>
                 <Text
                   style={{
@@ -223,149 +228,170 @@ export const Product = ({ navigation, route }) => {
                   {plant && plant.plant_description}
                 </Text>
               </View>
-              <View
-                style={[styles.quickInfo, { justifyContent: "space-between" }]}
-              >
+              <View style={styles.quickContainer}>
                 <View
-                  style={{
-                    padding: 15,
-                    borderRadius: 10,
-                    backgroundColor: myColors.lightAlt,
-                    flexDirection: "column",
-                    gap: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 10,
-                  }}
+                  style={[
+                    styles.quickInfo,
+                    { justifyContent: "space-between" },
+                  ]}
                 >
-                  <FontAwesomeIcon
-                    size={20}
-                    icon={faDollarSign}
-                    style={{ color: myColors.dark }}
-                  />
-                  <Text
+                  <View
                     style={{
-                      color: myColors.dark,
-                      fontFamily: "lusitanaBold",
-                      fontSize: 18,
+                      padding: 15,
+                      borderRadius: 10,
+                      backgroundColor: myColors.lightAlt,
+                      flexDirection: "column",
+                      gap: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      elevation: 10,
+                      flex: 1,
+                      flexWrap: "wrap",
+                      flexShrink: 1,
                     }}
                   >
-                    {plant && plant.price}
-                  </Text>
+                    <FontAwesomeIcon
+                      size={20}
+                      icon={faDollarSign}
+                      style={{ color: myColors.dark }}
+                    />
+                    <Text
+                      style={{
+                        color: myColors.dark,
+                        fontFamily: "lusitanaBold",
+                        fontSize: 18,
+                      }}
+                    >
+                      {plant && plant.price}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      padding: 15,
+                      borderRadius: 10,
+                      backgroundColor: myColors.lightAlt,
+                      flexDirection: "column",
+                      gap: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      elevation: 10,
+                      flex: 1,
+                      flexWrap: "wrap",
+                      flexShrink: 1,
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      size={20}
+                      icon={faDoorOpen}
+                      style={{ color: myColors.dark }}
+                    />
+                    <Text
+                      style={{
+                        color: myColors.dark,
+                        fontFamily: "lusitanaBold",
+                        fontSize: 18,
+                      }}
+                    >
+                      {plant && plant.plant_type}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      padding: 15,
+                      borderRadius: 10,
+                      backgroundColor: myColors.lightAlt,
+                      flexDirection: "column",
+                      gap: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      elevation: 10,
+                      flex: 1,
+                      flexWrap: "wrap",
+                      flexShrink: 1,
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      size={20}
+                      icon={faSun}
+                      style={{ color: myColors.dark }}
+                    />
+                    <Text
+                      style={{
+                        color: myColors.dark,
+                        fontFamily: "lusitanaBold",
+                        fontSize: 18,
+                      }}
+                    >
+                      {plant && plant.sun_exposure ? "full-sun" : "low-light"}
+                    </Text>
+                  </View>
                 </View>
-                <View
-                  style={{
-                    padding: 15,
-                    borderRadius: 10,
-                    backgroundColor: myColors.lightAlt,
-                    flexDirection: "column",
-                    gap: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 10,
-                  }}
-                >
-                  <FontAwesomeIcon
-                    size={20}
-                    icon={faDoorOpen}
-                    style={{ color: myColors.dark }}
-                  />
-                  <Text
+
+                <View style={[styles.quickInfo, {}]}>
+                  <View
                     style={{
-                      color: myColors.dark,
-                      fontFamily: "lusitanaBold",
-                      fontSize: 18,
+                      padding: 15,
+                      borderRadius: 10,
+                      backgroundColor: myColors.lightAlt,
+                      flexDirection: "column",
+                      gap: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      elevation: 10,
+                      flex: 1,
+                      flexWrap: "wrap",
+                      flexShrink: 1,
                     }}
                   >
-                    {plant && plant.plant_type}
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    padding: 15,
-                    borderRadius: 10,
-                    backgroundColor: myColors.lightAlt,
-                    flexDirection: "column",
-                    gap: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 10,
-                  }}
-                >
-                  <FontAwesomeIcon
-                    size={20}
-                    icon={faSun}
-                    style={{ color: myColors.dark }}
-                  />
-                  <Text
+                    <FontAwesomeIcon
+                      size={20}
+                      icon={faCat}
+                      style={{ color: myColors.dark }}
+                    />
+                    <Text
+                      style={{
+                        color: myColors.dark,
+                        fontFamily: "lusitanaBold",
+                        fontSize: 18,
+                      }}
+                    >
+                      {plant && plant.toxicity}
+                    </Text>
+                  </View>
+
+                  <View
                     style={{
-                      color: myColors.dark,
-                      fontFamily: "lusitanaBold",
-                      fontSize: 18,
+                      padding: 15,
+                      borderRadius: 10,
+                      backgroundColor: myColors.lightAlt,
+                      flexDirection: "column",
+                      gap: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      elevation: 10,
+                      flex: 1,
+                      flexWrap: "wrap",
+                      flexShrink: 1,
                     }}
                   >
-                    {plant && plant.sun_exposure ? "full-sun" : "low-light"}
-                  </Text>
+                    <FontAwesomeIcon
+                      size={20}
+                      icon={faSeedling}
+                      style={{ color: myColors.dark }}
+                    />
+                    <Text
+                      style={{
+                        color: myColors.dark,
+                        fontFamily: "lusitanaBold",
+                        fontSize: 18,
+                      }}
+                    >
+                      {plant && plant.soil_type}
+                    </Text>
+                  </View>
                 </View>
               </View>
 
-              <View style={[styles.quickInfo, {}]}>
-                <View
-                  style={{
-                    padding: 15,
-                    borderRadius: 10,
-                    backgroundColor: myColors.lightAlt,
-                    flexDirection: "column",
-                    gap: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 10,
-                  }}
-                >
-                  <FontAwesomeIcon
-                    size={20}
-                    icon={faCat}
-                    style={{ color: myColors.dark }}
-                  />
-                  <Text
-                    style={{
-                      color: myColors.dark,
-                      fontFamily: "lusitanaBold",
-                      fontSize: 18,
-                    }}
-                  >
-                    {plant && plant.toxicity}
-                  </Text>
-                </View>
-
-                <View
-                  style={{
-                    padding: 15,
-                    borderRadius: 10,
-                    backgroundColor: myColors.lightAlt,
-                    flexDirection: "column",
-                    gap: 10,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    elevation: 10,
-                  }}
-                >
-                  <FontAwesomeIcon
-                    size={20}
-                    icon={faSeedling}
-                    style={{ color: myColors.dark }}
-                  />
-                  <Text
-                    style={{
-                      color: myColors.dark,
-                      fontFamily: "lusitanaBold",
-                      fontSize: 18,
-                    }}
-                  >
-                    {plant && plant.soil_type}
-                  </Text>
-                </View>
-              </View>
               <View
                 style={[
                   styles.plantDes,
@@ -481,20 +507,26 @@ export const Product = ({ navigation, route }) => {
               }}
               onPress={() => addToCart()}
             >
-              <FontAwesomeIcon
-                icon={alreadyAdded ? faCheck : faCartPlus}
-                size={26}
-                style={{ color: myColors.light }}
-              />
-              <Text
-                style={{
-                  fontFamily: "lusitanaBold",
-                  fontSize: 22,
-                  color: myColors.light,
-                }}
-              >
-                {alreadyAdded ? "Added to the Cart" : "Add to Cart"}
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="small" color={myColors.light} />
+              ) : (
+                <>
+                  <FontAwesomeIcon
+                    icon={alreadyAdded ? faCheck : faCartPlus}
+                    size={26}
+                    style={{ color: myColors.light }}
+                  />
+                  <Text
+                    style={{
+                      fontFamily: "lusitanaBold",
+                      fontSize: 22,
+                      color: myColors.light,
+                    }}
+                  >
+                    {alreadyAdded ? "Added to the Cart" : "Add to Cart"}
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -535,7 +567,6 @@ const styles = StyleSheet.create({
     backgroundColor: myColors.lightGreen,
     flex: 1,
     zIndex: 3000,
-    padding: 10,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -544,7 +575,11 @@ const styles = StyleSheet.create({
     zIndex: 800,
     gap: 20,
   },
-
+  quickContainer: {
+    justifyContent: "center",
+    width: "100%",
+    overflow: "hidden",
+  },
   quickInfo: {
     alignItems: "flex-start",
     flexDirection: "row",
