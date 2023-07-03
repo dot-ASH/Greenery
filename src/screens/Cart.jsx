@@ -19,7 +19,7 @@ import {
   faCircleMinus,
   faCirclePlus,
 } from "@fortawesome/free-solid-svg-icons";
-import { CheckBox } from "react-native-elements/dist/checkbox/CheckBox";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { addons } from "react-native";
 
 export const Cart = () => {
@@ -28,7 +28,8 @@ export const Cart = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [updateValue, setUpdateValue] = useState(false);
   const [elavatedBg, setElavatedBg] = useState(false);
-  const [loading, setLoading] = useState({item: null,state:false});
+  const [loading, setLoading] = useState({ item: null, state: false });
+  const [isThisCart, setIsThisCart] = useState(true); 
   const proCount = useRef(null);
   // console.log(loading);
   const getUID = async () => {
@@ -70,7 +71,7 @@ export const Cart = () => {
 
     if (action == "+") {
       if (item.length > 0) {
-        setLoading({item: cartId});
+        setLoading({ item: cartId });
         let newQty = item[0].amount + 1;
         let newPrice = newQty * price;
         const { data, error } = await supabase
@@ -80,7 +81,7 @@ export const Cart = () => {
         if (error) {
           console.log(error);
         } else {
-          setLoading({item: null});
+          setLoading({ item: null });
         }
       }
     } else {
@@ -88,7 +89,7 @@ export const Cart = () => {
         if (item[0]?.amount > 0) {
           let newQty = item[0].amount - 1;
           if (newQty > 0) {
-            setLoading({item: cartId});
+            setLoading({ item: cartId });
             let newPrice = newQty * price;
             const { data, error } = await supabase
               .from("cart")
@@ -97,7 +98,7 @@ export const Cart = () => {
             if (error) {
               console.log(error);
             } else {
-              setLoading({item: null});
+              setLoading({ item: null });
             }
           } else {
             const { error } = await supabase
@@ -120,6 +121,41 @@ export const Cart = () => {
     return 1;
   }
 
+  function getCartItemCount() {
+    let itemCount = plants?.filter((a) => a.check == true);
+    return itemCount?.length;
+  }
+
+  async function selectItem(cartId, isChecked) {
+    console.log(isChecked);
+    if (isChecked) {
+      console.log(isChecked, cartId);
+      const { data, error } = await supabase
+        .from("cart")
+        .update({ check: false })
+        .eq("id", cartId);
+      if (error) {
+        console.log(error);
+      }
+    } else if (!isChecked) {
+      console.log(isChecked, cartId);
+      const { data, error } = await supabase
+        .from("cart")
+        .update({ check: true })
+        .eq("id", cartId);
+      if (error) {
+        console.log(error);
+      }
+    }
+  }
+
+  function sumOrder() {
+    let itemCount = plants?.filter((a) => a.check == true);
+    let total = itemCount?.reduce((a, b) => a + (b.totalAmount || 0), 0)
+
+    return total?.toFixed(2)
+}
+
   return (
     <>
       <SafeAreaView style={[styles.container, styles.showBorder]}>
@@ -140,9 +176,13 @@ export const Cart = () => {
               color: myColors.darkAlt,
             }}
           >
-            {"CART"}
+            {isThisCart? "CART": "HISTORY"}
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity
+              onPress={() =>
+                isThisCart ? setIsThisCart(false) : setIsThisCart(true)
+              }
+          >
             <Text
               style={{
                 fontFamily: "algreyaBold",
@@ -150,7 +190,7 @@ export const Cart = () => {
                 color: myColors.dark,
               }}
             >
-              {"Order History"}
+              {isThisCart? "Order History": "Cart"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -187,10 +227,16 @@ export const Cart = () => {
                         ]}
                         key={key}
                       >
-                        <CheckBox
-                          checked={item.check ? true : false}
-                          style={{ width: 20, color: myColors.dark }}
-                        ></CheckBox>
+                        <BouncyCheckbox
+                          size={25}
+                          fillColor={myColors.dark}
+                          unfillColor={myColors.light}
+                          iconStyle={{ borderColor: myColors.dark }}
+                          innerIconStyle={{ borderWidth: 1 }}
+                          style={{ padding: 10 }}
+                          isChecked={item.check ? true : false}
+                          onPress={() => selectItem(item.id, item.check)}
+                        />
                         <View
                           style={[
                             {
@@ -230,6 +276,8 @@ export const Cart = () => {
                               justifyContent: "space-between",
                               alignItems: "center",
                               paddingHorizontal: 20,
+                              gap: 10
+                              
                             },
                           ]}
                         >
@@ -251,7 +299,7 @@ export const Cart = () => {
                           <View
                             style={{
                               flexDirection: "row",
-                              gap: 10,
+                              gap: 15,
                               alignItems: "center",
                             }}
                           >
@@ -328,7 +376,7 @@ export const Cart = () => {
                 color: myColors.lightAlt,
               }}
             >
-              Selected Items: 1
+              Selected Items: {getCartItemCount()}
             </Text>
             <Text
               style={{
@@ -337,7 +385,7 @@ export const Cart = () => {
                 color: myColors.lightAlt,
               }}
             >
-              Total Price ${1600}
+              Total Price: ${sumOrder()}
             </Text>
           </View>
           <TouchableOpacity

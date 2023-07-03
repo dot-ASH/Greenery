@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, SafeAreaView, StyleSheet, Text } from "react-native";
 import { supabase } from "../data/Supabase";
 import { myColors } from "../styles/Colors";
+import { Map } from "./Map";
 
 export const Search = () => {
   const [userEmail, setUserEmail] = useState("");
@@ -22,6 +23,7 @@ export const Search = () => {
   return (
     <>
       <SafeAreaView style={styles.container}>
+        {/* <Map /> */}
         <Text style={styles.pageTitle}>Search</Text>
       </SafeAreaView>
     </>

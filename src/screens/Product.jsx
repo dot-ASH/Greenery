@@ -75,6 +75,7 @@ export const Product = ({ navigation, route }) => {
   useEffect(() => {
     getUsers();
     checkCart();
+    checkSaved();
   });
 
   useEffect(() => {
@@ -119,6 +120,21 @@ export const Product = ({ navigation, route }) => {
     }
   };
 
+  const checkSaved = async () => {
+    const response = await supabase
+      .from("saved")
+      .select("*")
+      .eq("user_id", userId?.id)
+      .eq("product_id", route.params.id);
+    if (!response.error) {
+      if (response.data.length > 0) {
+        setLiked(true);
+      } else {
+        setLiked(false);
+      }
+    }
+  };
+
   const shrinkFull = () => {
     setElavatedBg(false);
     setMargin(-20);
@@ -149,8 +165,15 @@ export const Product = ({ navigation, route }) => {
     }
   };
 
-  const likedPro = () => {
-    setLiked(true);
+  const likedPro = async () => {
+    const { data, error } = await supabase
+      .from("saved")
+      .insert([{ product_id: route.params.id, user_id: userId.id }]);
+    if (!error) {
+      setLiked(true);
+    } else {
+      console.log(error);
+    }
   };
 
   return (
@@ -169,6 +192,10 @@ export const Product = ({ navigation, route }) => {
             top: 60,
             left: 30,
             zIndex: 4000,
+            backgroundColor: myColors.lightGreen,
+            padding: 5,
+            borderRadius: 10,
+            opacity: 0.5,
           }}
           onPress={() => navigation.push("Drawerstack")}
         >
@@ -190,7 +217,7 @@ export const Product = ({ navigation, route }) => {
             style={{
               width: "95%",
               height: 60,
-              marginTop: 10, 
+              marginTop: 10,
               borderRadius: 20,
               backgroundColor: myColors.lightAlt,
               elevation: 20,
@@ -217,18 +244,18 @@ export const Product = ({ navigation, route }) => {
             scrollEventThrottle={160}
           >
             <View style={{ width: "100%" }}>
-              <View style={styles.plantDes}>
-                <Text
-                  style={{
-                    color: "white",
-                    fontFamily: "lusitanaBold",
-                    fontSize: 18,
-                  }}
-                >
-                  {plant && plant.plant_description}
-                </Text>
-              </View>
               <View style={styles.quickContainer}>
+                <View style={styles.plantDes}>
+                  <Text
+                    style={{
+                      color: "white",
+                      fontFamily: "lusitanaBold",
+                      fontSize: 18,
+                    }}
+                  >
+                    {plant && plant.plant_description}
+                  </Text>
+                </View>
                 <View
                   style={[
                     styles.quickInfo,
@@ -390,78 +417,82 @@ export const Product = ({ navigation, route }) => {
                     </Text>
                   </View>
                 </View>
-              </View>
-
-              <View
-                style={[
-                  styles.plantDes,
-                  { flexDirection: "row", gap: 10, alignItems: "center" },
-                ]}
-              >
-                <FontAwesomeIcon
-                  icon={faFlag}
-                  style={{ color: myColors.highText }}
-                />
-                <Text
-                  style={{
-                    color: "white",
-                    fontFamily: "lusitanaBold",
-                    fontSize: 18,
-                  }}
-                >
-                  However, The plant {plant && plant.plant_care}.
-                </Text>
-              </View>
-
-              <View style={styles.sectionHeader}>
                 <View
-                  style={{
-                    flexDirection: "row",
-                    gap: 20,
-                    alignItems: "center",
-                  }}
+                  style={[
+                    styles.plantDes,
+                    {
+                      flexDirection: "row",
+                      gap: 20,
+                      flexShrink: 1,
+                      padding: 30,
+                    },
+                  ]}
                 >
                   <FontAwesomeIcon
-                    icon={faFileImage}
-                    style={{ color: myColors.lightAlt }}
+                    icon={faFlag}
+                    style={{ color: myColors.highText }}
                   />
                   <Text
                     style={{
-                      color: myColors.lightAlt,
+                      color: "white",
                       fontFamily: "lusitanaBold",
-                      fontSize: 20,
+                      fontSize: 18,
                     }}
                   >
-                    More images
+                    However, The plant {plant && plant.plant_care}.
                   </Text>
                 </View>
 
-                <View style={styles.imageContainer}>
-                  {plant.details_img
-                    ? plant.details_img.map((item, key) => {
-                        return (
-                          <View
-                            style={{
-                              height: 250,
-                              flex: 0.5,
-                              borderRadius: 15,
-                              overflow: "hidden",
-                              elevation: 10,
-                            }}
-                            key={key}
-                          >
-                            <Image
-                              source={{
-                                uri: item,
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 20,
+                      alignItems: "center",
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faFileImage}
+                      style={{ color: myColors.lightAlt }}
+                    />
+                    <Text
+                      style={{
+                        color: myColors.lightAlt,
+                        fontFamily: "lusitanaBold",
+                        fontSize: 20,
+                      }}
+                    >
+                      More images
+                    </Text>
+                  </View>
+
+                  <View style={styles.imageContainer}>
+                    {plant.details_img
+                      ? plant.details_img.map((item, key) => {
+                          return (
+                            <View
+                              style={{
+                                height: 250,
+                                flex: 0.5,
+                                borderRadius: 15,
+                                overflow: "hidden",
+                                elevation: 10,
                               }}
-                              contentFit="cover"
-                              transition={1000}
-                              style={{ width: "100%", height: "100%" }}
-                            />
-                          </View>
-                        );
-                      })
-                    : null}
+                              key={key}
+                            >
+                              <Image
+                                source={{
+                                  uri: item,
+                                }}
+                                contentFit="cover"
+                                transition={1000}
+                                style={{ width: "100%", height: "100%" }}
+                              />
+                            </View>
+                          );
+                        })
+                      : null}
+                  </View>
                 </View>
               </View>
             </View>
@@ -576,8 +607,11 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   quickContainer: {
+    marginLeft: 5,
+    marginTop: 10,
+    marginRight: 20,
     justifyContent: "center",
-    width: "100%",
+    flex: 1,
     overflow: "hidden",
   },
   quickInfo: {
@@ -646,10 +680,13 @@ const styles = StyleSheet.create({
   plantDes: {
     backgroundColor: myColors.lightGreen,
     elevation: 10,
-    marginHorizontal: 20,
+    flex: 1,
     borderRadius: 10,
     padding: 15,
     marginVertical: 10,
+    marginHorizontal: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
   imageContainer: {
     flex: 1,
