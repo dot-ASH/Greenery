@@ -66,7 +66,7 @@ export const Home = ({ navigation }) => {
   async function getDiscountedPlants() {
     const response = await supabase
       .from("plant")
-      .select(`*`)
+      .select(`id, plant_name, image_url, price, discounts(amount)`)
       .eq("discounts", 1);
 
     if (response.error) {
@@ -113,7 +113,11 @@ export const Home = ({ navigation }) => {
               {userData && userData.avatar_url ? (
                 <Image
                   source={userData.avatar_url}
-                  style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+                  style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                   contentFit="cover"
                   transition={1000}
                 ></Image>
@@ -219,24 +223,28 @@ export const Home = ({ navigation }) => {
                           <View style={styles.sectionContent} key={key}>
                             <ImageBackground
                               source={{ uri: item.image_url }}
-                              style={styles.image}
+                              style={[styles.image , {gap:100}]}
                               resizeMode="cover"
                               transition={1000}
                             >
                               <TouchableOpacity
-                                onPress={() =>{
-                                   console.log(item.id);
+                                onPress={() => {
+                                  console.log(item.id);
                                   navigation.navigate("product", {
                                     id: item.id,
-                                  })
-                                }
-                                 
-                                }
+                                  });
+                                }}
                               >
                                 <Text style={styles.contentText}>
                                   {item.plant_name}
                                 </Text>
+                             
                               </TouchableOpacity>
+                                 {item.discounts ? (
+                                  <Text style={[styles.contentText, {alignSelf: "flex-end", marginRight: -40, width: 60, textAlign:"left"}]}>
+                                    {item.discounts.amount} %
+                                  </Text>
+                                ) : null}
                             </ImageBackground>
                           </View>
                         );

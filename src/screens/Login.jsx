@@ -117,7 +117,7 @@ export const Login = ({ navigation }) => {
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
     if (data.session?.user) {
-      return data.session.user.id;
+      return data.session?.user.id;
     }
   };
 
@@ -125,7 +125,6 @@ export const Login = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* PRIO AND MAMUN */}
       {loginSucess === true ? (
         <CustomAlert
           alertType="success"

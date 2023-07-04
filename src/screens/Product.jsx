@@ -96,7 +96,9 @@ export const Product = ({ navigation, route }) => {
   async function getPlant() {
     const response = await supabase
       .from("plant")
-      .select(`*`)
+      .select(
+        `id,plant_name,image_url,discounts(amount),price,plant_description,sun_exposure,toxicity,plant_type,plant_care,plant_family,soil_type,common_name,details_img`
+      )
       .eq("id", route.params.id);
     if (response.error) {
       console.log(response.error);
@@ -176,6 +178,10 @@ export const Product = ({ navigation, route }) => {
     }
   };
 
+  const discountedAmount = (price, amount) => {
+    return price - price * (amount / 100);
+  };
+
   return (
     <>
       <StatusBar
@@ -192,7 +198,7 @@ export const Product = ({ navigation, route }) => {
             top: 60,
             left: 30,
             zIndex: 4000,
-            backgroundColor: myColors.lightGreen,
+            backgroundColor: myColors.transDark,
             padding: 5,
             borderRadius: 10,
             opacity: 0.5,
@@ -202,7 +208,7 @@ export const Product = ({ navigation, route }) => {
           <FontAwesomeIcon
             size={24}
             icon={faAngleLeft}
-            style={{ color: myColors.dark }}
+            style={{ color: myColors.darkAlt }}
           />
         </TouchableOpacity>
         <View style={styles.profileBanner}>
@@ -269,28 +275,62 @@ export const Product = ({ navigation, route }) => {
                       backgroundColor: myColors.lightAlt,
                       flexDirection: "column",
                       gap: 10,
-                      justifyContent: "center",
-                      alignItems: "center",
                       elevation: 10,
                       flex: 1,
                       flexWrap: "wrap",
                       flexShrink: 1,
+                      alignContent: "center",
                     }}
                   >
                     <FontAwesomeIcon
                       size={20}
                       icon={faDollarSign}
-                      style={{ color: myColors.dark }}
+                      style={{ color: myColors.dark, alignSelf: "center" }}
                     />
-                    <Text
-                      style={{
-                        color: myColors.dark,
-                        fontFamily: "lusitanaBold",
-                        fontSize: 18,
-                      }}
-                    >
-                      {plant && plant.price}
-                    </Text>
+                    {plant?.discounts ? (
+                      <View style={{flexDirection: "row", justifyContent: "center", alignItems:"center", gap: 10}}>
+                        <Text
+                          style={{
+                            color: myColors.dark,
+                            fontFamily: "lusitanaBold",
+                            fontSize: 18,
+                            textAlign: "center",
+                            alignSelf: "center",
+                            textDecorationLine: "line-through",
+                            textDecorationStyle: "solid",
+                          }}
+                        >
+                          {plant?.price}
+                        </Text>
+                        <Text
+                          style={{
+                            color: myColors.dark,
+                            fontFamily: "lusitanaBold",
+                            fontSize: 18,
+                            textAlign: "center",
+                            alignSelf: "center",
+              
+                          }}
+                        >
+                          {discountedAmount(
+                            plant?.price,
+                            plant?.discounts.amount
+                          )}
+                        </Text>
+                      </View>
+                    ) : (
+                      <Text
+                        style={{
+                          color: myColors.dark,
+                          fontFamily: "lusitanaBold",
+                          fontSize: 18,
+                          textAlign: "center",
+                          alignSelf: "center",
+                        }}
+                      >
+                        {plant?.price}
+                      </Text>
+                    )}
                   </View>
                   <View
                     style={{
@@ -299,24 +339,25 @@ export const Product = ({ navigation, route }) => {
                       backgroundColor: myColors.lightAlt,
                       flexDirection: "column",
                       gap: 10,
-                      justifyContent: "center",
-                      alignItems: "center",
                       elevation: 10,
                       flex: 1,
                       flexWrap: "wrap",
                       flexShrink: 1,
+                      alignContent: "center",
                     }}
                   >
                     <FontAwesomeIcon
                       size={20}
                       icon={faDoorOpen}
-                      style={{ color: myColors.dark }}
+                      style={{ color: myColors.dark, alignSelf: "center" }}
                     />
                     <Text
                       style={{
                         color: myColors.dark,
                         fontFamily: "lusitanaBold",
                         fontSize: 18,
+                        textAlign: "center",
+                        alignSelf: "center",
                       }}
                     >
                       {plant && plant.plant_type}
@@ -329,24 +370,25 @@ export const Product = ({ navigation, route }) => {
                       backgroundColor: myColors.lightAlt,
                       flexDirection: "column",
                       gap: 10,
-                      justifyContent: "center",
-                      alignItems: "center",
                       elevation: 10,
                       flex: 1,
                       flexWrap: "wrap",
                       flexShrink: 1,
+                      alignContent: "center",
                     }}
                   >
                     <FontAwesomeIcon
                       size={20}
                       icon={faSun}
-                      style={{ color: myColors.dark }}
+                      style={{ color: myColors.dark, alignSelf: "center" }}
                     />
                     <Text
                       style={{
                         color: myColors.dark,
                         fontFamily: "lusitanaBold",
                         fontSize: 18,
+                        textAlign: "center",
+                        alignSelf: "center",
                       }}
                     >
                       {plant && plant.sun_exposure ? "full-sun" : "low-light"}
@@ -362,24 +404,25 @@ export const Product = ({ navigation, route }) => {
                       backgroundColor: myColors.lightAlt,
                       flexDirection: "column",
                       gap: 10,
-                      justifyContent: "center",
-                      alignItems: "center",
                       elevation: 10,
                       flex: 1,
                       flexWrap: "wrap",
                       flexShrink: 1,
+                      alignContent: "center",
                     }}
                   >
                     <FontAwesomeIcon
                       size={20}
                       icon={faCat}
-                      style={{ color: myColors.dark }}
+                      style={{ color: myColors.dark, alignSelf: "center" }}
                     />
                     <Text
                       style={{
                         color: myColors.dark,
                         fontFamily: "lusitanaBold",
                         fontSize: 18,
+                        textAlign: "center",
+                        alignSelf: "center",
                       }}
                     >
                       {plant && plant.toxicity}
@@ -393,24 +436,25 @@ export const Product = ({ navigation, route }) => {
                       backgroundColor: myColors.lightAlt,
                       flexDirection: "column",
                       gap: 10,
-                      justifyContent: "center",
-                      alignItems: "center",
                       elevation: 10,
                       flex: 1,
                       flexWrap: "wrap",
                       flexShrink: 1,
+                      alignContent: "center",
                     }}
                   >
                     <FontAwesomeIcon
                       size={20}
                       icon={faSeedling}
-                      style={{ color: myColors.dark }}
+                      style={{ color: myColors.dark, alignSelf: "center" }}
                     />
                     <Text
                       style={{
                         color: myColors.dark,
                         fontFamily: "lusitanaBold",
                         fontSize: 18,
+                        textAlign: "center",
+                        alignSelf: "center",
                       }}
                     >
                       {plant && plant.soil_type}

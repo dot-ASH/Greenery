@@ -17,6 +17,7 @@ import {
   ActivityIndicator,
   TextInput,
   ScrollView,
+  SectionList,
 } from "react-native";
 import { supabase } from "../data/Supabase";
 import { myColors } from "../styles/Colors";
@@ -37,6 +38,7 @@ import {
 import { CustomAlert } from "../styles/CustomAlert";
 import GestureRecognizer from "react-native-swipe-gestures";
 import MapView from "react-native-maps";
+import DropDownPicker from "react-native-dropdown-picker";
 
 if (
   Platform.OS === "android" &&
@@ -44,6 +46,9 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+const PASS_REGEX =
+  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W\_])[a-zA-Z0-9\W\_]{8,15}$/;
 
 export const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState();
@@ -59,6 +64,18 @@ export const Profile = ({ navigation }) => {
   const [ifSuccess, setIfSuccess] = useState(false);
   const [ifWrong, setIfWrong] = useState(false);
   const [disabled, setDisabled] = useState(true);
+  const [margin, setMargin] = useState(0);
+
+  const [open, setOpen] = useState(false);
+  const [ddValue, setDdValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: "Dhaka", value: "dhaka" },
+    { label: "Outside Dhaka", value: "outside" },
+  ]);
+
+  const [isNotiEnabled, setIsNotiEnabled] = useState(false);
+  const toggleSwitch = () =>
+    setIsNotiEnabled((previousState) => !previousState);
 
   const [form, setForm] = useState({
     name: "",
@@ -66,6 +83,30 @@ export const Profile = ({ navigation }) => {
     profession: "",
     age: "",
   });
+
+  const [addrForm, setaddrForm] = useState({
+    address: "",
+  });
+
+  const [passForm, setPassForm] = useState({
+    newPass: "",
+    confirmPass: "",
+  });
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+
+  useEffect(() => {
+    // setForm({
+    //   name: userData?.fullName,
+    //   profession: userData?.fullName,
+    //   age: userData?.age,
+    //   number: userData?.phn_no,
+    // })
+
+    console.log(passForm, logText);
+  }, [passForm]);
 
   const onChangeHandler = (value, name) => {
     setDisabled(false);
@@ -75,6 +116,25 @@ export const Profile = ({ navigation }) => {
       [name]: value,
     }));
   };
+
+  const onChangeAddrHandler = (value, name) => {
+    setDisabled(false);
+    // how to handle for each state field
+    setaddrForm((addrForm) => ({
+      ...addrForm,
+      [name]: value,
+    }));
+  };
+
+  const onChangePassHandler = (value, name) => {
+    setDisabled(false);
+    // how to handle for each state field
+    setPassForm((passForm) => ({
+      ...passForm,
+      [name]: value,
+    }));
+  };
+
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
     if (data.session?.user) {
@@ -96,21 +156,6 @@ export const Profile = ({ navigation }) => {
     }
   }
 
-  useEffect(() => {
-    getUsers();
-  }, []);
-
-  useEffect(() => {
-    // setForm({
-    //   name: userData?.fullName,
-    //   profession: userData?.fullName,
-    //   age: userData?.age,
-    //   number: userData?.phn_no,
-    // })
-
-    console.log(form, logText);
-  }, [form]);
-
   const getAnimation = () => {
     LayoutAnimation.configureNext({
       duration: 250,
@@ -126,6 +171,9 @@ export const Profile = ({ navigation }) => {
   const getAccount = () => {};
 
   const handleFormSubmit = async () => {
+    setIfSuccess(false);
+    setIfWrong(false);
+    setLogText("");
     if (form.name) {
       setIfLoading(true);
       const { data, error } = await supabase
@@ -134,22 +182,120 @@ export const Profile = ({ navigation }) => {
         .eq("id", userData?.id);
       if (error) {
         setIfWrong(true);
-        setLogText(error);
+        setLogText("Check your Inputs");
       } else {
         setLogText("Fullname changed");
         setIfSuccess(true);
         setIfLoading(false);
-     
       }
     }
     if (form.number) {
-      console.log("age", form.number);
+      setIfLoading(true);
+      const { data, error } = await supabase
+        .from("users")
+        .update([{ phn_no: form.number }])
+        .eq("id", userData?.id);
+      if (error) {
+        setIfWrong(true);
+        setLogText("Check your Inputs");
+      } else {
+        setLogText("Phone no. changed");
+        setIfSuccess(true);
+        setIfLoading(false);
+      }
     }
     if (form.age) {
-      console.log("age", form.age, userData?.id);
+      setIfLoading(true);
+      const { data, error } = await supabase
+        .from("users")
+        .update([{ age: form.age }])
+        .eq("id", userData?.id);
+      if (error) {
+        setIfWrong(true);
+        setLogText("Check your Inputs");
+      } else {
+        setLogText("Age changed");
+        setIfSuccess(true);
+        setIfLoading(false);
+      }
     }
     if (form.profession) {
-      console.log("age", form.profession);
+      setIfLoading(true);
+      const { data, error } = await supabase
+        .from("users")
+        .update([{ profession: form.profession }])
+        .eq("id", userData?.id);
+      if (error) {
+        setIfWrong(true);
+        setLogText("Check your Inputs");
+      } else {
+        setLogText("Profession changed");
+        setIfSuccess(true);
+        setIfLoading(false);
+      }
+    }
+  };
+
+  const handleAddrFormSubmit = async () => {
+    setIfSuccess(false);
+    setIfWrong(false);
+    setLogText("");
+
+    if (ddValue) {
+      const { data, error } = await supabase
+        .from("users")
+        .update([{ location: ddValue }])
+        .eq("id", userData?.id);
+      if (error) {
+        setIfWrong(true);
+        console.log(error);
+        // setLogText(error);
+      } else {
+        setLogText("Location changed");
+        setIfSuccess(true);
+        setIfLoading(false);
+      }
+    }
+
+    if (addrForm.address) {
+      setIfLoading(true);
+      const { data, error } = await supabase
+        .from("users")
+        .update([{ address: addrForm.address }])
+        .eq("id", userData?.id);
+      if (error) {
+        setIfWrong(true);
+        setLogText("Check your Inputs");
+      } else {
+        setLogText("Address changed");
+        setIfSuccess(true);
+        setIfLoading(false);
+      }
+    }
+  };
+
+  const handlePassFormSubmit = async () => {
+    setIfSuccess(false);
+    setIfWrong(false);
+    setLogText("");
+
+    if (passForm.newPass === passForm.confirmPass) {
+      setIfLoading(true);
+      setIfSuccess(true);
+      console.log(passForm.newPass);
+      if (PASS_REGEX.test(passForm.newPass)) {
+        const response = await supabase.auth.updateUser({
+          password: passForm.newPass,
+        });
+        console.log(response);
+        setIfLoading(false);
+        setLogText("Password changed!");
+      } else {
+        setLogText("Password isn't secure. Use capital letters and symboles");
+      }
+    } else {
+      setIfWrong(true);
+      setLogText("Passwords don't match");
     }
   };
 
@@ -331,10 +477,10 @@ export const Profile = ({ navigation }) => {
                 false: myColors.lightGreen,
                 true: myColors.lightGreen,
               }}
-              thumbColor={myColors.dark}
+              thumbColor={isNotiEnabled ? myColors.dark : myColors.light}
               ios_backgroundColor="#3e3e3e"
-              // onValueChange={toggleSwitch}
-              value={true}
+              onValueChange={toggleSwitch}
+              value={isNotiEnabled}
               style={{ elevation: 20 }}
             ></Switch>
           </View>
@@ -351,25 +497,78 @@ export const Profile = ({ navigation }) => {
             getAnimation();
             setAddrModule(false);
             setElavatedBg(false);
+            setLogText("");
+            setIfLoading(false);
+            setIfSuccess(false);
+            setIfWrong(false);
           }}
           style={styles.gestureStyle}
         >
           <View
             style={{
-              alignSelf: "flex-end",
               borderBottomWidth: 1,
               borderBottomColor: "rgba(0, 0, 0, 0.1)",
               width: "100%",
               paddingBottom: 20,
               paddingTop: 10,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
           >
+            {/* Loading and logs */}
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 20,
+                justifyContent: "flex-start",
+              }}
+            >
+              {ifLoading ? (
+                <ActivityIndicator
+                  size={"small"}
+                  color={myColors.lightGreen}
+                ></ActivityIndicator>
+              ) : null}
+              {ifSuccess ? (
+                <FontAwesomeIcon
+                  icon={faCircleCheck}
+                  size={20}
+                  color={myColors.dark}
+                ></FontAwesomeIcon>
+              ) : null}
+              {ifWrong ? (
+                <FontAwesomeIcon
+                  icon={faCircleExclamation}
+                  size={20}
+                  color={myColors.dark}
+                ></FontAwesomeIcon>
+              ) : null}
+              {logText ? (
+                <Text
+                  style={{
+                    color: myColors.dark,
+                    fontFamily: "lusitanaBold",
+                    fontSize: 16,
+                  }}
+                >
+                  {logText}
+                </Text>
+              ) : null}
+            </View>
+            {/* ends */}
+
             <TouchableOpacity
               onPress={() => {
                 getAnimation();
                 setAddrModule(false);
                 setElavatedBg(false);
+                setLogText("");
+                setIfLoading(false);
+                setIfSuccess(false);
+                setIfWrong(false);
               }}
+              style={{ alignSelf: "flex-end" }}
             >
               <FontAwesomeIcon
                 size={20}
@@ -381,35 +580,96 @@ export const Profile = ({ navigation }) => {
               ></FontAwesomeIcon>
             </TouchableOpacity>
           </View>
+          {/* <ScrollView > */}
           <View
             style={{
               paddingVertical: 10,
               alignItems: "center",
-              flexDirection: "row",
+              flexDirection: "column",
               justifyContent: "space-between",
               width: "100%",
+              gap: 20,
             }}
           >
+            {/* Module Comp  */}
             <Text
               style={{
-                color: myColors.darkAlt,
+                textAlign: "center",
                 fontFamily: "algreyaBold",
-                fontSize: 20,
+                fontSize: 22,
+                color: myColors.darkAlt,
               }}
             >
-              Get Notification
+              My Address
             </Text>
-            <Switch
-              trackColor={{
-                false: myColors.lightGreen,
-                true: myColors.lightGreen,
+
+            <View
+              style={[
+                styles.inputContainer,
+                { height: 60, marginBottom: margin },
+              ]}
+            >
+              <Text style={styles.label}>Location: </Text>
+              <DropDownPicker
+                open={open}
+                value={ddValue || userData?.location}
+                items={items}
+                setOpen={setOpen}
+                setValue={setDdValue}
+                setItems={setItems}
+                style={[
+                  {
+                    backgroundColor: myColors.light,
+                    borderColor: myColors.lightGreen,
+                    width: 220,
+                  },
+                ]}
+                containerStyle={{
+                  width: 220,
+                  backgroundColor: myColors.light,
+                  borderColor: myColors.light,
+                  zIndex: 3000,
+                }}
+                dropDownContainerStyle={{
+                  backgroundColor: myColors.light,
+                  borderColor: myColors.lightGreen,
+                  borderTopColor: myColors.light,
+                  zIndex: 10000,
+                  color: myColors.light,
+                }}
+                zIndex={5000}
+                textStyle={styles.textInput}
+                onPress={() => {
+                  margin === 0 ? setMargin(70) : setMargin(0);
+                }}
+                onSelectItem={() => setMargin(0)}
+              />
+            </View>
+            <View style={[styles.inputContainer, { zIndex: 1000 }]}>
+              <Text style={styles.label}>Address: </Text>
+              <TextInput
+                style={styles.textInput}
+                value={form.address || userData?.address}
+                onChangeText={(value) => onChangeAddrHandler(value, "address")}
+              ></TextInput>
+            </View>
+
+            <TouchableOpacity
+              style={{
+                alignSelf: "center",
+                backgroundColor: myColors.darkAlt,
+                borderRadius: 10,
+                padding: 10,
               }}
-              thumbColor={myColors.dark}
-              ios_backgroundColor="#3e3e3e"
-              // onValueChange={toggleSwitch}
-              value={true}
-              style={{ elevation: 20 }}
-            ></Switch>
+              disabled={false}
+              onPress={handleAddrFormSubmit}
+            >
+              <Text
+                style={[styles.label, { fontSize: 20, color: myColors.light }]}
+              >
+                Submit
+              </Text>
+            </TouchableOpacity>
           </View>
         </GestureRecognizer>
       </>
@@ -426,8 +686,8 @@ export const Profile = ({ navigation }) => {
             setElavatedBg(false);
             setLogText("");
             setIfLoading(false);
-            setIfSuccess(false)
-            setIfWrong(false)
+            setIfSuccess(false);
+            setIfWrong(false);
           }}
           style={styles.gestureStyle}
         >
@@ -492,8 +752,8 @@ export const Profile = ({ navigation }) => {
                 setElavatedBg(false);
                 setLogText("");
                 setIfLoading(false);
-                setIfSuccess(false)
-                setIfWrong(false)
+                setIfSuccess(false);
+                setIfWrong(false);
               }}
               style={{ alignSelf: "flex-end" }}
             >
@@ -598,25 +858,78 @@ export const Profile = ({ navigation }) => {
             getAnimation();
             setPassModule(false);
             setElavatedBg(false);
+            setLogText("");
+            setIfLoading(false);
+            setIfSuccess(false);
+            setIfWrong(false);
           }}
           style={styles.gestureStyle}
         >
           <View
             style={{
-              alignSelf: "flex-end",
               borderBottomWidth: 1,
               borderBottomColor: "rgba(0, 0, 0, 0.1)",
               width: "100%",
               paddingBottom: 20,
               paddingTop: 10,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
           >
+            {/* Loading and logs */}
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 20,
+                justifyContent: "flex-start",
+              }}
+            >
+              {ifLoading ? (
+                <ActivityIndicator
+                  size={"small"}
+                  color={myColors.lightGreen}
+                ></ActivityIndicator>
+              ) : null}
+              {ifSuccess ? (
+                <FontAwesomeIcon
+                  icon={faCircleCheck}
+                  size={20}
+                  color={myColors.dark}
+                ></FontAwesomeIcon>
+              ) : null}
+              {ifWrong ? (
+                <FontAwesomeIcon
+                  icon={faCircleExclamation}
+                  size={20}
+                  color={myColors.dark}
+                ></FontAwesomeIcon>
+              ) : null}
+              {logText ? (
+                <Text
+                  style={{
+                    color: myColors.dark,
+                    fontFamily: "lusitanaBold",
+                    fontSize: 16,
+                  }}
+                >
+                  {logText}
+                </Text>
+              ) : null}
+            </View>
+            {/* ends */}
+
             <TouchableOpacity
               onPress={() => {
                 getAnimation();
                 setPassModule(false);
                 setElavatedBg(false);
+                setLogText("");
+                setIfLoading(false);
+                setIfSuccess(false);
+                setIfWrong(false);
               }}
+              style={{ alignSelf: "flex-end" }}
             >
               <FontAwesomeIcon
                 size={20}
@@ -628,36 +941,75 @@ export const Profile = ({ navigation }) => {
               ></FontAwesomeIcon>
             </TouchableOpacity>
           </View>
-          <View
-            style={{
-              paddingVertical: 10,
-              alignItems: "center",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              width: "100%",
-            }}
-          >
-            <Text
+          <ScrollView scrollEnabled>
+            <View
               style={{
-                color: myColors.darkAlt,
-                fontFamily: "algreyaBold",
-                fontSize: 20,
+                paddingVertical: 10,
+                alignItems: "center",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                width: "100%",
+                gap: 20,
               }}
             >
-              Get Notification
-            </Text>
-            <Switch
-              trackColor={{
-                false: myColors.lightGreen,
-                true: myColors.lightGreen,
-              }}
-              thumbColor={myColors.dark}
-              ios_backgroundColor="#3e3e3e"
-              // onValueChange={toggleSwitch}
-              value={true}
-              style={{ elevation: 20 }}
-            ></Switch>
-          </View>
+              {/* Module Comp  */}
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontFamily: "algreyaBold",
+                  fontSize: 22,
+                  color: myColors.darkAlt,
+                }}
+              >
+                Change Password
+              </Text>
+
+              <View style={[styles.inputContainer, { width: 300 }]}>
+                <Text style={styles.label}>New Password: </Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.newPass}
+                  onChangeText={(value) =>
+                    onChangePassHandler(value, "newPass")
+                  }
+                  secureTextEntry={true}
+                ></TextInput>
+              </View>
+
+              <View style={[styles.inputContainer, { width: 300 }]}>
+                <Text style={styles.label}>Confirm Password: </Text>
+                <TextInput
+                  style={styles.textInput}
+                  value={form.confirmPass}
+                  onChangeText={(value) =>
+                    onChangePassHandler(value, "confirmPass")
+                  }
+                  secureTextEntry={true}
+                ></TextInput>
+              </View>
+              <TouchableOpacity
+                style={{
+                  alignSelf: "center",
+                  backgroundColor: disabled
+                    ? myColors.lightGreen
+                    : myColors.darkAlt,
+                  borderRadius: 10,
+                  padding: 10,
+                }}
+                disabled={disabled}
+                onPress={handlePassFormSubmit}
+              >
+                <Text
+                  style={[
+                    styles.label,
+                    { fontSize: 20, color: myColors.light },
+                  ]}
+                >
+                  Submit
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </GestureRecognizer>
       </>
     );
@@ -752,6 +1104,16 @@ export const Profile = ({ navigation }) => {
         {accModule ? AccModule() : null}
         {psModule ? passModule() : null}
         {tmModule ? termModule() : null}
+
+        {showAlert ? (
+          <CustomAlert
+            alertType="alert"
+            title={"Alert!!"}
+            isVisible={showAlert ? true : false}
+            onExit={() => setShowAlert(false)}
+            message="Logging you out in a second...."
+          />
+        ) : null}
 
         <ImageBackground style={styles.profileBanner}>
           <View style={styles.uploadBtn}></View>
@@ -902,50 +1264,6 @@ export const Profile = ({ navigation }) => {
           </View>
         </View>
       </SafeAreaView>
-      {/* <SafeAreaView style={styles.container}>
-        {showAlert ? (
-          <CustomAlert
-            alertType="alert"
-            title={"Alert!!"}
-            isVisible={showAlert ? true : false}
-            onExit={() => setShowAlert(false)}
-            message="Logging you out in a second...."
-          />
-        ) : null}
-        <View style={{ gap: 20 }}>
-          <Text style={styles.pageTitle}>Profile</Text>
-          <Text
-            style={{
-              fontFamily: "lusitanaBold",
-              backgroundColor: myColors.dark,
-              color: "white",
-              width: 250,
-              borderRadius: 10,
-              padding: 10,
-              textAlign: "center",
-              alignSelf: "center",
-            }}
-          >{`Welcome ${userData ? userData.full_name : null}`}</Text>
-          <TouchableOpacity
-            style={{ flexDirection: "row", gap: 10, justifyContent: "center" }}
-            onPress={signOut}
-          >
-            <FontAwesomeIcon
-              icon={faRightFromBracket}
-              style={{ color: myColors.darkAlt }}
-            />
-            <Text
-              style={{
-                fontFamily: "lusitana",
-                fontSize: 12,
-                color: myColors.darkAlt,
-              }}
-            >
-              Sign-out
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView> */}
     </>
   );
 };
@@ -1058,7 +1376,7 @@ const styles = StyleSheet.create({
     borderColor: myColors.lightGreen,
     alignItems: "center",
     gap: 10,
-    overflow: "hidden",
+    zIndex: 1000,
   },
   textInput: {
     color: myColors.darkAlt,
