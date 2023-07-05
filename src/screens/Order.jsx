@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { myColors } from "../styles/Colors";
 import { Text } from "react-native";
 import { supabase } from "../data/Supabase";
@@ -7,6 +13,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { StatusBar } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faCheckDouble } from "@fortawesome/free-solid-svg-icons";
+import { CustomAlert } from "../styles/CustomAlert";
 
 const data = [{ label: "Cash On Delivery", value: "cod" }];
 
@@ -14,6 +21,8 @@ export const Order = ({ navigation, route }) => {
   const [userData, setUserData] = useState();
   const [dropdown, setDropdown] = useState(null);
   const [selected, setSelected] = useState([]);
+  const [cartItems, setCartItems] = useState();
+  const [showAlert, setShowAlert] = useState(false);
 
   const _renderItem = (item) => {
     return (
@@ -44,9 +53,63 @@ export const Order = ({ navigation, route }) => {
     }
   }
 
+  const getCartItems = async () => {
+    const response = await supabase
+      .from("cart")
+      .select(
+        "amount, id, totalAmount, check ,product_id(plant_name ,image_url, price)"
+      )
+      .eq("user_id", userData?.id)
+      .eq("check", true);
+
+    if (response.error) console.log(response.error);
+    else setCartItems(response?.data);
+  };
+
   useEffect(() => {
     getUsers();
-  }, []);
+    getCartItems();
+  }, [cartItems]);
+
+  const orderNow = async (amount) => {
+    if (!dropdown) {
+      setShowAlert(true);
+    } else {
+      setShowAlert(true);
+      let description = "";
+      cartItems?.forEach((element) => {
+        description =
+          description + `${element.amount} ${element.product_id.plant_name}, `;
+      });
+      console.log(userData?.id, amount, dropdown);
+      const { data, error } = await supabase
+        .from("order")
+        .insert([
+          {
+            user_id: userData?.id,
+            details: description,
+            totalAmount: amount,
+            status: "processing",
+            pay_method: dropdown,
+          },
+        ])
+        .select();
+      if (!error) {
+        setShowAlert(false);
+        console.log("success");
+        cartItems?.forEach(async (element) => {
+          const { error } = await supabase
+            .from("cart")
+            .delete()
+            .eq("id", element.id);
+        });
+        if (!error) {
+          setShowAlert(false);
+          navigation.goBack();
+        }
+      } else console.log(error);
+    }
+  };
 
   return (
     <>
@@ -57,11 +120,30 @@ export const Order = ({ navigation, route }) => {
         hidden={false}
       />
       <SafeAreaView style={styles.container}>
+        {showAlert && !dropdown ? (
+          <CustomAlert
+            alertType="error"
+            title={"Alert!!"}
+            isVisible={showAlert ? true : false}
+            onExit={() => setShowAlert(false)}
+            message="You haven't selected payment method!"
+          />
+        ) : null}
+
+        {showAlert && dropdown ? (
+          <CustomAlert
+            alertType="success"
+            title={"Alert!!"}
+            isVisible={showAlert ? true : false}
+            onExit={() => setShowAlert(false)}
+            message="Your order is being wrapped up......"
+          />
+        ) : null}
+
         <Text style={styles.pageTitle}>ORDER DETAILS</Text>
         {/*Payment method  */}
         <View style={{ gap: 15 }}>
-        <View style={{ flexDirection: "row", gap: 10 }}>
-            
+          <View style={{ flexDirection: "row", gap: 10 }}>
             <Text
               style={[
                 styles.text,
@@ -72,12 +154,11 @@ export const Order = ({ navigation, route }) => {
                 },
               ]}
             >
-              Owner: 
+              Owner:
             </Text>
             <Text style={styles.text}>{userData?.full_name}</Text>
           </View>
           <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
-            
             <Text
               style={[
                 styles.text,
@@ -123,15 +204,19 @@ export const Order = ({ navigation, route }) => {
               selectedStyle={styles.lightBg}
               activeColor={myColors.light}
               fontFamily="lusitanaBold"
-              onPress={() => {
-                console.log("jeihisaho");
-              }}
             />
           </View>
         </View>
         {/* Product details  */}
         <View style={styles.proDetails}>
-          <View style={{ width:"100%", padding: 15 }}>
+          <View
+            style={{
+              width: "100%",
+              padding: 15,
+              justifyContent: "space-between",
+              height: "100%",
+            }}
+          >
             <View
               style={{
                 width: "100%",
@@ -146,35 +231,97 @@ export const Order = ({ navigation, route }) => {
                   color: myColors.darkAlt,
                   fontFamily: "judsonItalic",
                   fontSize: 23,
-                  textAlign: "center"
+                  textAlign: "center",
                 }}
               >
                 Billing
               </Text>
             </View>
-          </View>
-          <View style={{ width:"100%", padding: 15 , flex: 1}}>
+
+            {/* Starts Here */}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "flex-start",
+                padding: 15,
+                paddingVertical: 30,
+                gap: 10,
+              }}
+            >
+              <ScrollView>
+                {cartItems &&
+                  cartItems.map((item) => {
+                    return (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                        key={item.id}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            gap: 10,
+                            alignItems: "center",
+                          }}
+                        >
+                          <Text
+                            style={{ fontFamily: "lusitana", fontSize: 18 }}
+                          >
+                            {item?.amount}x
+                          </Text>
+                          <Text
+                            style={{ fontFamily: "lusitanaBold", fontSize: 18 }}
+                          >
+                            {item?.product_id.plant_name}
+                          </Text>
+                        </View>
+                        <Text
+                          style={{
+                            color: myColors.darkAlt,
+                            fontFamily: "judsonItalic",
+                            fontSize: 23,
+                            textAlign: "center",
+                          }}
+                        >
+                          ${item?.totalAmount?.toFixed(2)}
+                        </Text>
+                      </View>
+                    );
+                  })}
+              </ScrollView>
+            </View>
+
             <View
               style={{
                 width: "100%",
                 borderStyle: "dashed",
-                borderBottomColor: myColors.dark,
-                borderBottomWidth: 1,
-                paddingBottom: 15,
+                borderTopColor: myColors.dark,
+                borderTopWidth: 1,
+                paddingTop: 15,
+                justifyContent: "space-between",
+                paddingHorizontal: 20,
+                flexDirection: "row",
+                alignItems: "center",
               }}
             >
+              <Text style={{ fontFamily: "lusitanaBold", fontSize: 18 }}>
+                Total:
+              </Text>
               <Text
                 style={{
                   color: myColors.darkAlt,
                   fontFamily: "judsonItalic",
                   fontSize: 23,
-                  textAlign: "center"
+                  textAlign: "center",
                 }}
               >
-                Total
+                $ {route.params.total}
               </Text>
             </View>
           </View>
+
           <TouchableOpacity
             style={{
               width: "100%",
@@ -186,7 +333,7 @@ export const Order = ({ navigation, route }) => {
               flexDirection: "row",
               gap: 20,
             }}
-            onPress={() => navigation.navigate("order", { total: sumOrder() })}
+            onPress={() => orderNow(route.params.total)}
           >
             <FontAwesomeIcon
               size={24}
@@ -200,12 +347,10 @@ export const Order = ({ navigation, route }) => {
                 color: myColors.light,
               }}
             >
-              Checkout!
+              Order Now!
             </Text>
           </TouchableOpacity>
         </View>
-        <Text>{userData?.full_name}</Text>
-        <Text>{route.params.total}</Text>
       </SafeAreaView>
     </>
   );
@@ -216,7 +361,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-start",
     paddingHorizontal: 30,
-    paddingTop: 80,
+    paddingTop: 60,
     gap: 10,
     backgroundColor: myColors.lightGreen,
   },
@@ -225,7 +370,7 @@ const styles = StyleSheet.create({
     fontFamily: "algreyaBold",
     color: myColors.darkAlt,
     fontSize: 34,
-    margin: 15,
+    margin: 20,
   },
   item: {
     paddingVertical: 17,
@@ -275,7 +420,7 @@ const styles = StyleSheet.create({
     borderColor: myColors.dark,
     borderWidth: 1,
     borderRadius: 10,
-    height: 550,
+    height: 500,
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: myColors.light,
