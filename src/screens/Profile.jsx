@@ -98,13 +98,6 @@ export const Profile = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    // setForm({
-    //   name: userData?.fullName,
-    //   profession: userData?.fullName,
-    //   age: userData?.age,
-    //   number: userData?.phn_no,
-    // })
-
     console.log(passForm, logText);
   }, [passForm]);
 
@@ -167,8 +160,6 @@ export const Profile = ({ navigation }) => {
     setElavatedBg(true);
     setNotiModule(true);
   };
-
-  const getAccount = () => {};
 
   const handleFormSubmit = async () => {
     setIfSuccess(false);

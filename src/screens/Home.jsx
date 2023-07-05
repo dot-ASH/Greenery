@@ -223,7 +223,7 @@ export const Home = ({ navigation }) => {
                           <View style={styles.sectionContent} key={key}>
                             <ImageBackground
                               source={{ uri: item.image_url }}
-                              style={[styles.image , {gap:100}]}
+                              style={[styles.image ]}
                               resizeMode="cover"
                               transition={1000}
                             >
@@ -241,7 +241,7 @@ export const Home = ({ navigation }) => {
                              
                               </TouchableOpacity>
                                  {item.discounts ? (
-                                  <Text style={[styles.contentText, {alignSelf: "flex-end", marginRight: -40, width: 60, textAlign:"left"}]}>
+                                  <Text style={[styles.contentText, {position: "absolute", alignSelf: "flex-end", right: -20, width: 60, textAlign:"left", bottom: 30}]}>
                                     {item.discounts.amount} %
                                   </Text>
                                 ) : null}
@@ -351,7 +351,6 @@ const styles = StyleSheet.create({
     paddingTop: 80,
     gap: 10,
   },
-  titleContainer: {},
   profileIcon: {
     backgroundColor: myColors.dark,
     width: 70,

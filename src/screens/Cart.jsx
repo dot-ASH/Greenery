@@ -15,6 +15,7 @@ import { supabase } from "../data/Supabase";
 import { myColors } from "../styles/Colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
+  faBagShopping,
   faCheckDouble,
   faCircleMinus,
   faCirclePlus,
@@ -22,14 +23,14 @@ import {
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { addons } from "react-native";
 
-export const Cart = () => {
+export const Cart = ({ navigation }) => {
   const [plants, setPlants] = useState();
   const [orderedPlants, setOrderedPlants] = useState();
   const [showAlert, setShowAlert] = useState(false);
   const [updateValue, setUpdateValue] = useState(false);
   const [elavatedBg, setElavatedBg] = useState(false);
   const [loading, setLoading] = useState({ item: null, state: false });
-  const [isThisCart, setIsThisCart] = useState(true); 
+  const [isThisCart, setIsThisCart] = useState(true);
   const proCount = useRef(null);
   // console.log(loading);
   const getUID = async () => {
@@ -151,10 +152,10 @@ export const Cart = () => {
 
   function sumOrder() {
     let itemCount = plants?.filter((a) => a.check == true);
-    let total = itemCount?.reduce((a, b) => a + (b.totalAmount || 0), 0)
+    let total = itemCount?.reduce((a, b) => a + (b.totalAmount || 0), 0);
 
-    return total?.toFixed(2)
-}
+    return total?.toFixed(2);
+  }
 
   return (
     <>
@@ -176,12 +177,12 @@ export const Cart = () => {
               color: myColors.darkAlt,
             }}
           >
-            {isThisCart? "CART": "HISTORY"}
+            {isThisCart ? "CART" : "HISTORY"}
           </Text>
           <TouchableOpacity
-              onPress={() =>
-                isThisCart ? setIsThisCart(false) : setIsThisCart(true)
-              }
+            onPress={() =>
+              isThisCart ? setIsThisCart(false) : setIsThisCart(true)
+            }
           >
             <Text
               style={{
@@ -190,7 +191,7 @@ export const Cart = () => {
                 color: myColors.dark,
               }}
             >
-              {isThisCart? "Order History": "Cart"}
+              {isThisCart ? "Order History" : "Cart"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -276,8 +277,7 @@ export const Cart = () => {
                               justifyContent: "space-between",
                               alignItems: "center",
                               paddingHorizontal: 20,
-                              gap: 10
-                              
+                              gap: 10,
                             },
                           ]}
                         >
@@ -399,10 +399,11 @@ export const Cart = () => {
               flexDirection: "row",
               gap: 20,
             }}
+            onPress={() => navigation.navigate("order", { total: sumOrder() })}
           >
             <FontAwesomeIcon
               size={24}
-              icon={faCheckDouble}
+              icon={faBagShopping}
               style={{ color: myColors.dark }}
             />
             <Text
@@ -412,7 +413,7 @@ export const Cart = () => {
                 color: myColors.dark,
               }}
             >
-              Order Now!
+              Checkout!
             </Text>
           </TouchableOpacity>
         </View>

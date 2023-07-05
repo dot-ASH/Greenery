@@ -14,6 +14,7 @@ import { supabase } from "./src/data/Supabase";
 import { Image } from "expo-image";
 import { Notification } from "./src/screens/Notification";
 import { Product } from "./src/screens/Product";
+import { Order } from "./src/screens/Order";
 
 global.Buffer = Buffer;
 
@@ -89,44 +90,31 @@ export default function App() {
         <Stack.Screen
           name="Welcome"
           component={Welcome}
-          options={{  headerLeft: null }}
+          options={{ headerLeft: null }}
         />
         <Stack.Screen
           name="Login"
           component={Login}
           options={{
-
             headerLeft: null,
             gestureEnabled: false,
           }}
         />
 
-        <Stack.Screen
-          name="Reg"
-          component={Registration}
-
-        />
+        <Stack.Screen name="Reg" component={Registration} />
         <Stack.Screen
           name="Drawerstack"
           component={DrawerStack}
-  
           initialParams={{ active: "Home" }}
         />
         <Stack.Screen
           name="postSignup"
           component={PostSignup}
-  
           initialParams={{ active: "Home" }}
         />
-         <Stack.Screen
-          name="notifi"
-          component={Notification}
-        />
-        <Stack.Screen
-          name="product"
-          component={Product}
-  
-        />
+        <Stack.Screen name="notifi" component={Notification} />
+        <Stack.Screen name="product" component={Product} />
+        <Stack.Screen name="order" component={Order} />
       </Stack.Navigator>
     </NavigationContainer>
   ) : (
