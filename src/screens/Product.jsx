@@ -50,6 +50,7 @@ export const Product = ({ navigation, route }) => {
   const [alreadyAdded, setAlreadyAdded] = useState(false);
   const [liked, setLiked] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [compLoading, setCompLoading] = useState(false);
 
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -79,21 +80,27 @@ export const Product = ({ navigation, route }) => {
   });
 
   useEffect(() => {
-    navigation.addListener("beforeRemove", (e) => {
-      if (elavatedBg === false) {
-        return;
-      }
-      e.preventDefault();
-    });
-  }, [navigation, elavatedBg]);
+    console.log(route.params.id);
+  }, [route.params.id]);
+
+  useEffect(() => {
+    handleDefault();
+  }, [elavatedBg]);
 
   useEffect(() => {
     getPlant();
     shrinkFull();
     setLiked(false);
-  }, [navigation, route.params.id]);
+  }, [route.params.id]);
+
+  // useEffect(() => {
+  //   if (plant) {
+  //     setCompLoading(false);
+  //   }
+  // }, [plant]);
 
   async function getPlant() {
+    setCompLoading(true);
     const response = await supabase
       .from("plant")
       .select(
@@ -104,6 +111,7 @@ export const Product = ({ navigation, route }) => {
       console.log(response.error);
     } else {
       setPlant(response?.data[0]);
+      setCompLoading(false);
     }
   }
 
@@ -135,6 +143,16 @@ export const Product = ({ navigation, route }) => {
         setLiked(false);
       }
     }
+  };
+
+  const handleDefault = () => {
+    navigation.addListener("beforeRemove", (e) => {
+      if (elavatedBg === false) {
+        return;
+      }
+      e.preventDefault();
+    });
+    // shrinkFull();
   };
 
   const shrinkFull = () => {
@@ -191,6 +209,35 @@ export const Product = ({ navigation, route }) => {
         hidden={false}
       />
 
+      {compLoading ? (
+      <View
+        style={{
+          flex: 1,
+          zIndex: 8000,
+          position: "absolute",
+          width: Dimensions.get("window").width,
+          height: Dimensions.get("window").height + 80,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: myColors.darkAlt,
+            color: myColors.light,
+            height: 200,
+            width: 250,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 15
+          }}
+        >
+          <ActivityIndicator size={"large"} color={myColors.light} />
+        </View>
+      </View>
+      ) : null}
+      
+
       <SafeAreaView style={styles.container}>
         <TouchableOpacity
           style={{
@@ -203,7 +250,9 @@ export const Product = ({ navigation, route }) => {
             borderRadius: 10,
             opacity: 0.5,
           }}
-          onPress={() => navigation.push("Drawerstack")}
+          onPress={() => {
+            navigation.push("Drawerstack");
+          }}
         >
           <FontAwesomeIcon
             size={24}
@@ -288,7 +337,14 @@ export const Product = ({ navigation, route }) => {
                       style={{ color: myColors.dark, alignSelf: "center" }}
                     />
                     {plant?.discounts ? (
-                      <View style={{flexDirection: "row", justifyContent: "center", alignItems:"center", gap: 10}}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 10,
+                        }}
+                      >
                         <Text
                           style={{
                             color: myColors.dark,
@@ -309,7 +365,6 @@ export const Product = ({ navigation, route }) => {
                             fontSize: 18,
                             textAlign: "center",
                             alignSelf: "center",
-              
                           }}
                         >
                           {discountedAmount(

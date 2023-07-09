@@ -9,8 +9,11 @@ import {
 } from "react-native";
 import { myColors } from "./Colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { faXmarkCircle } from "@fortawesome/free-regular-svg-icons";
+import { faCross, faXmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCommentDots,
+  faXmarkCircle,
+} from "@fortawesome/free-regular-svg-icons";
 import { faBell, faCheckSquare } from "@fortawesome/free-regular-svg-icons";
 
 var width = Dimensions.get("window").width;
@@ -51,19 +54,16 @@ export const CustomAlert = (props) => {
           </Text>
 
           <TouchableOpacity onPress={props.onExit}>
-            <Text
+            <FontAwesomeIcon
+              size={24}
+              icon={faXmark}
               style={{
                 color:
                   props.alertType === "error"
                     ? myColors.errorText
                     : myColors.dark,
-                fontFamily: "lusitanaBold",
-                fontWeight: "bold",
-                fontSize: 32,
               }}
-            >
-              X
-            </Text>
+            ></FontAwesomeIcon>
           </TouchableOpacity>
         </View>
         <View style={styles.body}>
@@ -92,9 +92,18 @@ export const CustomAlert = (props) => {
               style={{ marginTop: -20, color: myColors.lightGreen }}
             />
           ) : null}
+
+          {props.alertType === "pompt" ? (
+            <FontAwesomeIcon
+              icon={faCommentDots}
+              size={60}
+              style={{ marginTop: -20, color: myColors.lightGreen }}
+            />
+          ) : null}
+
           <Text
             style={{
-              fontSize: 20,
+              fontSize: 23,
               fontFamily: "lusitanaBold",
               color:
                 props.alertType === "error"
@@ -105,6 +114,55 @@ export const CustomAlert = (props) => {
           >
             {props.message}
           </Text>
+
+          {props.alertType === "pompt" ? (
+            <View
+              style={{
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "space-around"
+              }}
+            >
+              <TouchableOpacity
+                onPress={props.onCancle}
+                style={{
+                  borderRadius: 10,
+                  backgroundColor: myColors.dark,
+                  padding: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontFamily: "monospace",
+                    fontWeight: "bold",
+                    color: myColors.light,
+                  }}
+                >
+                  Cancle
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={props.onYes}
+                style={{
+                  borderRadius: 10,
+                  backgroundColor: myColors.dark,
+                  padding: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontFamily: "monospace",
+                    fontWeight: "bold",
+                    color: myColors.light,
+                  }}
+                >
+                  Go Ahead
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
         </View>
       </View>
     </View>
@@ -129,6 +187,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "rgba(246, 252, 214, 0.85)",
     elevation: 80,
+    width: 350
   },
 
   alertHeader: {

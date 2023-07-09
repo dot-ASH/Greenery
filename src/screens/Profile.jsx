@@ -7,17 +7,14 @@ import {
   TouchableOpacity,
   UIManager,
   View,
-  Image,
   SafeAreaView,
   Dimensions,
   StatusBar,
   ImageBackground,
-  Modal,
   Switch,
   ActivityIndicator,
   TextInput,
   ScrollView,
-  SectionList,
 } from "react-native";
 import { supabase } from "../data/Supabase";
 import { myColors } from "../styles/Colors";
@@ -37,8 +34,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { CustomAlert } from "../styles/CustomAlert";
 import GestureRecognizer from "react-native-swipe-gestures";
-import MapView from "react-native-maps";
 import DropDownPicker from "react-native-dropdown-picker";
+// import * as FileSystem from "expo-file-system";
+import text from "../data/terms.json";
 
 if (
   Platform.OS === "android" &&
@@ -65,7 +63,6 @@ export const Profile = ({ navigation }) => {
   const [ifWrong, setIfWrong] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [margin, setMargin] = useState(0);
-
   const [open, setOpen] = useState(false);
   const [ddValue, setDdValue] = useState(null);
   const [items, setItems] = useState([
@@ -97,13 +94,8 @@ export const Profile = ({ navigation }) => {
     getUsers();
   }, []);
 
-  useEffect(() => {
-    console.log(passForm, logText);
-  }, [passForm]);
-
   const onChangeHandler = (value, name) => {
     setDisabled(false);
-    // how to handle for each state field
     setForm((form) => ({
       ...form,
       [name]: value,
@@ -112,7 +104,6 @@ export const Profile = ({ navigation }) => {
 
   const onChangeAddrHandler = (value, name) => {
     setDisabled(false);
-    // how to handle for each state field
     setaddrForm((addrForm) => ({
       ...addrForm,
       [name]: value,
@@ -121,7 +112,6 @@ export const Profile = ({ navigation }) => {
 
   const onChangePassHandler = (value, name) => {
     setDisabled(false);
-    // how to handle for each state field
     setPassForm((passForm) => ({
       ...passForm,
       [name]: value,
@@ -302,6 +292,10 @@ export const Profile = ({ navigation }) => {
     setTimeout(() => {
       navigation.navigate("Login");
     }, 1500);
+  };
+
+  const handleTxtFile = () => {
+    return text.text;
   };
 
   const settings = [
@@ -1051,28 +1045,55 @@ export const Profile = ({ navigation }) => {
               flexDirection: "row",
               justifyContent: "space-between",
               width: "100%",
+              height: 600,
             }}
           >
-            <Text
-              style={{
-                color: myColors.darkAlt,
-                fontFamily: "algreyaBold",
-                fontSize: 20,
-              }}
-            >
-              Get Notification
-            </Text>
-            <Switch
-              trackColor={{
-                false: myColors.lightGreen,
-                true: myColors.lightGreen,
-              }}
-              thumbColor={myColors.dark}
-              ios_backgroundColor="#3e3e3e"
-              // onValueChange={toggleSwitch}
-              value={true}
-              style={{ elevation: 20 }}
-            ></Switch>
+            <ScrollView>
+              <View style={{ width: "100%", padding: 20 }}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontFamily: "algreyaBold",
+                    fontSize: 26,
+                  }}
+                >
+                  {settings[4].title}
+                </Text>
+              </View>
+              <Text
+                style={{
+                  textAlign: "justify",
+                  fontFamily: "lusitana",
+                  fontSize: 16,
+                }}
+              >
+                {handleTxtFile()}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  getAnimation();
+                  setTermModule(false);
+                  setElavatedBg(false);
+                }}
+                style={{ width: "100%", justifyContent: "center" }}
+              >
+                <Text
+                  style={{
+                    alignSelf: "center",
+                    width: 80,
+                    padding: 15,
+                    backgroundColor: myColors.dark,
+                    borderRadius: 10,
+                    color: myColors.light,
+                    textAlign: "center",
+                    fontSize: 16,
+                    fontFamily: "lusitanaBold",
+                  }}
+                >
+                  I Agree
+                </Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
         </GestureRecognizer>
       </>

@@ -57,7 +57,7 @@ export const Order = ({ navigation, route }) => {
     const response = await supabase
       .from("cart")
       .select(
-        "amount, id, totalAmount, check ,product_id(plant_name ,image_url, price)"
+        "amount, id, totalAmount, check ,product_id(id, plant_name ,image_url, price)"
       )
       .eq("user_id", userData?.id)
       .eq("check", true);
@@ -77,11 +77,14 @@ export const Order = ({ navigation, route }) => {
     } else {
       setShowAlert(true);
       let description = "";
+      let plantsId=[];
+
       cartItems?.forEach((element) => {
         description =
           description + `${element.amount} ${element.product_id.plant_name}, `;
+          plantsId.push(element.product_id.id)
       });
-      console.log(userData?.id, amount, dropdown);
+      console.log(plantsId)
       const { data, error } = await supabase
         .from("order")
         .insert([
@@ -91,12 +94,12 @@ export const Order = ({ navigation, route }) => {
             totalAmount: amount,
             status: "processing",
             pay_method: dropdown,
+            plants_id: plantsId
           },
         ])
         .select();
       if (!error) {
         setShowAlert(false);
-        console.log("success");
         cartItems?.forEach(async (element) => {
           const { error } = await supabase
             .from("cart")
