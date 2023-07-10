@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
+  LayoutAnimation,
+  Platform,
+  UIManager,
   StyleSheet,
   SafeAreaView,
   Text,
@@ -10,12 +13,23 @@ import {
   ImageBackground,
   StatusBar,
   ActivityIndicator,
+  Linking,
+  TextInput,
 } from "react-native";
 import { Image } from "expo-image";
 import { supabase } from "../data/Supabase";
 import { myColors } from "../styles/Colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPlus, faUserTie } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faUserTie, faXmark } from "@fortawesome/free-solid-svg-icons";
+import GestureRecognizer from "react-native-swipe-gestures";
+import text from "../data/faq.json";
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export const Home = ({ navigation }) => {
   const [userData, setUserData] = useState([]);
@@ -24,6 +38,11 @@ export const Home = ({ navigation }) => {
   const [owned, setOwned] = useState([]);
   const [discountedPlants, setDiscountedPlants] = useState();
   const [compLoading, setCompLoading] = useState(true);
+  const [elavatedBg, setElavatedBg] = useState(false);
+  const [fqModule, setFaqModule] = useState(false);
+  const [askedQue, setAskedQue] = useState("");
+  const [disabled, setDisabled] = useState(true);
+  const [alertText, setAlertText] = useState("");
 
   useEffect(() => {
     getUsers();
@@ -36,6 +55,11 @@ export const Home = ({ navigation }) => {
   useEffect(() => {
     getOwned();
   }, [owned]);
+
+  useEffect(() => {
+    if (askedQue) setDisabled(false);
+    else setDisabled(true);
+  }, [askedQue]);
 
   plants.sort((a, b) => a.id - b.id);
 
@@ -119,6 +143,179 @@ export const Home = ({ navigation }) => {
     navigation.navigate("Drawerstack", { active: screen });
   };
 
+  const getAnimation = () => {
+    LayoutAnimation.configureNext({
+      duration: 250,
+      create: { type: "easeIn", property: "opacity" },
+    });
+  };
+
+  const sendQue = async () => {
+    const { data, error } = await supabase
+      .from("faq")
+      .insert([{ user_id: userData?.id, question: askedQue }])
+      .select();
+    if (!error) {
+      setElavatedBg(false);
+      setFaqModule(false);
+      getAnimation();
+      setAlertText("Question sent");
+      setTimeout(() => {
+        setAlertText("");
+      }, 4000);
+    } else {
+      console.log(error);
+    }
+  };
+
+  const faqModule = () => {
+    return (
+      <>
+        <GestureRecognizer
+          onSwipeDown={() => {
+            getAnimation();
+            setFaqModule(false);
+            setElavatedBg(false);
+          }}
+          style={styles.gestureStyle}
+        >
+          <View
+            style={{
+              alignSelf: "flex-end",
+              borderBottomWidth: 1,
+              borderBottomColor: "rgba(0, 0, 0, 0.1)",
+              width: "100%",
+              paddingBottom: 20,
+              paddingTop: 10,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                getAnimation();
+                setFaqModule(false);
+                setElavatedBg(false);
+              }}
+            >
+              <FontAwesomeIcon
+                size={20}
+                icon={faXmark}
+                style={{
+                  color: myColors.dark,
+                  alignSelf: "flex-end",
+                }}
+              ></FontAwesomeIcon>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              paddingVertical: 10,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              width: "100%",
+              height: 600,
+            }}
+          >
+            <ScrollView>
+              <View style={{ width: "100%", padding: 20 }}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontFamily: "algreyaBold",
+                    fontSize: 26,
+                  }}
+                >
+                  Frequently Asked Questions
+                </Text>
+              </View>
+              {text.map((item, key) => {
+                return (
+                  <View
+                    style={{ flexDirection: "column", marginVertical: 10 }}
+                    key={key}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "justify",
+                        fontFamily: "lusitanaBold",
+                        fontSize: 16,
+                      }}
+                    >
+                      {item.que}
+                    </Text>
+                    <Text
+                      style={{
+                        textAlign: "justify",
+                        fontFamily: "lusitana",
+                        fontSize: 16,
+                      }}
+                    >
+                      {"=>"} &nbsp;
+                      {item.ans}
+                    </Text>
+                  </View>
+                );
+              })}
+              <Text
+                style={{
+                  textAlign: "justify",
+                  fontFamily: "lusitanaBold",
+                  fontSize: 16,
+                  marginTop: 20,
+                }}
+              >
+                Have anything to ask?
+              </Text>
+              <View
+                style={{
+                  marginVertical: 20,
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <TextInput
+                  style={{
+                    width: 230,
+                    height: 50,
+                    borderWidth: 1,
+                    borderColor: myColors.lightGreen,
+                    borderRadius: 10,
+                    color: myColors.darkAlt,
+                    padding: 10,
+                    fontSize: 18,
+                    fontFamily: "lusitana",
+                  }}
+                  onChangeText={(value) => setAskedQue(value)}
+                />
+                <TouchableOpacity onPress={() => sendQue()} disabled={disabled}>
+                  <Text
+                    style={{
+                      alignSelf: "center",
+                      width: 80,
+                      padding: 15,
+                      backgroundColor: disabled
+                        ? myColors.lightGreen
+                        : myColors.dark,
+                      borderRadius: 10,
+                      color: myColors.light,
+                      textAlign: "center",
+                      fontSize: 16,
+                      fontFamily: "lusitanaBold",
+                    }}
+                  >
+                    Submit
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </GestureRecognizer>
+      </>
+    );
+  };
+
   return (
     <>
       <StatusBar
@@ -127,7 +324,36 @@ export const Home = ({ navigation }) => {
         backgroundColor={"transparent"}
         hidden={false}
       />
-
+      {elavatedBg ? <View style={styles.elavatedbg}></View> : null}
+      {fqModule ? faqModule() : null}
+      {alertText ? (
+        <View
+          style={{
+            position: "absolute",
+            backgroundColor: myColors.lightAlt,
+            zIndex: 5000,
+            borderColor: myColors.dark,
+            borderRadius: 15,
+            borderWidth: 0.4,
+            elevation: 30,
+            bottom: 120,
+            alignSelf: "center",
+            padding: 15,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "justify",
+              fontFamily: "lusitanaBold",
+              fontSize: 18,
+            }}
+          >
+            {alertText}
+          </Text>
+        </View>
+      ) : null}
       <ScrollView
         showsVerticalScrollIndicator
         style={{ flex: 1, width: Dimensions.get("window").width }}
@@ -517,13 +743,30 @@ export const Home = ({ navigation }) => {
                 <Text style={styles.sectionTitle}>Support</Text>
               </View>
               <View style={styles.sectionContentContainer}>
-                <TouchableOpacity style={{ elevation: 5 }}>
+                <TouchableOpacity
+                  style={{ elevation: 5 }}
+                  onPress={() => {
+                    Linking.openURL("tel:01963606880");
+                  }}
+                >
                   <Text style={styles.supportButtonText}>Call</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ elevation: 5 }}>
+                <TouchableOpacity
+                  style={{ elevation: 5 }}
+                  onPress={() => {
+                    Linking.openURL("mailto:19202103403@bubt.cse.edu.com");
+                  }}
+                >
                   <Text style={styles.supportButtonText}>Email</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ elevation: 5 }}>
+                <TouchableOpacity
+                  style={{ elevation: 5 }}
+                  onPress={() => {
+                    getAnimation();
+                    setElavatedBg(true);
+                    setFaqModule(true);
+                  }}
+                >
                   <Text style={styles.supportButtonText}>FAQ</Text>
                 </TouchableOpacity>
               </View>
@@ -556,9 +799,17 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingVertical: 10,
-
     marginTop: -20,
   },
+
+  elavatedbg: {
+    position: "absolute",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    height: Dimensions.get("window").height + 80,
+    width: Dimensions.get("window").width,
+    zIndex: 2000,
+  },
+
   sectionTitle: {
     fontSize: 32,
     fontFamily: "algreyaBold",
@@ -616,5 +867,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     elevation: 5,
+  },
+  gestureStyle: {
+    position: "absolute",
+    paddingHorizontal: 30,
+    paddingVertical: 20,
+    width: Dimensions.get("window").width - 20,
+    bottom: 80,
+    zIndex: 3000,
+    backgroundColor: myColors.light,
+    borderRadius: 20,
+    elevation: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
   },
 });
