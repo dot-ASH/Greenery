@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
   TextInput,
   ScrollView,
+  Alert,
 } from "react-native";
 import { supabase } from "../data/Supabase";
 import { myColors } from "../styles/Colors";
@@ -35,7 +36,7 @@ import {
 import { CustomAlert } from "../styles/CustomAlert";
 import GestureRecognizer from "react-native-swipe-gestures";
 import DropDownPicker from "react-native-dropdown-picker";
-// import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
 import text from "../data/terms.json";
 
 if (
@@ -65,12 +66,15 @@ export const Profile = ({ navigation }) => {
   const [margin, setMargin] = useState(0);
   const [open, setOpen] = useState(false);
   const [ddValue, setDdValue] = useState(null);
+  const [isNotiEnabled, setIsNotiEnabled] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [photo, setPhoto] = useState("");
   const [items, setItems] = useState([
     { label: "Dhaka", value: "dhaka" },
     { label: "Outside Dhaka", value: "outside" },
   ]);
+  const [errorText, setErrorText] = useState();
 
-  const [isNotiEnabled, setIsNotiEnabled] = useState(false);
   const toggleSwitch = () =>
     setIsNotiEnabled((previousState) => !previousState);
 
@@ -92,7 +96,7 @@ export const Profile = ({ navigation }) => {
 
   useEffect(() => {
     getUsers();
-  }, []);
+  }, [userData]);
 
   const onChangeHandler = (value, name) => {
     setDisabled(false);
@@ -1100,6 +1104,64 @@ export const Profile = ({ navigation }) => {
     );
   };
 
+  const showImagePicker = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      showAlert(true);
+      errorText("You've refused to allow this appp to access your photos!");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setImageLoading(true);
+      let base64Img = `data:image/jpg;base64,${result.assets[0].base64}`;
+      let CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/di7kzjary/upload";
+      let data = {
+        file: base64Img,
+        upload_preset: "greenery",
+      };
+      fetch(CLOUDINARY_URL, {
+        body: JSON.stringify(data),
+        headers: {
+          "content-type": "application/json",
+        },
+        method: "POST",
+      })
+        .then(async (r) => {
+          let data = await r.json();
+          console.log(data.url);
+          setPhoto(data.url);
+          photoUpToDB(data.url);
+        })
+        .catch((err) => {
+          showAlert(true);
+          errorText(err);
+        });
+    }
+  };
+
+  const photoUpToDB = async (url) => {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ avatar_url: url })
+      .eq("id", userData?.id)
+      .select();
+    if (!error) {
+      setImageLoading(false);
+    } else {
+      console.log(error);
+      showAlert(true);
+      errorText("Upload failed");
+      setImageLoading(false);
+    }
+  };
+
   return (
     <>
       <StatusBar
@@ -1117,9 +1179,19 @@ export const Profile = ({ navigation }) => {
         {psModule ? passModule() : null}
         {tmModule ? termModule() : null}
 
-        {showAlert ? (
+        {showAlert && !errorText ? (
           <CustomAlert
             alertType="alert"
+            title={"Alert!!"}
+            isVisible={showAlert ? true : false}
+            onExit={() => setShowAlert(false)}
+            message="Logging you out in a second...."
+          />
+        ) : null}
+
+        {showAlert && errorText ? (
+          <CustomAlert
+            alertType="error"
             title={"Alert!!"}
             isVisible={showAlert ? true : false}
             onExit={() => setShowAlert(false)}
@@ -1130,18 +1202,27 @@ export const Profile = ({ navigation }) => {
         <ImageBackground style={styles.profileBanner}>
           <View style={styles.uploadBtn}></View>
           <ImageBackground
-            source={{ uri: userData ? userData.avatar_url : null }}
+            source={{
+              uri: userData && !imageLoading ? userData.avatar_url : null,
+            }}
             style={styles.avatar}
           >
-            <View style={[styles.uploadBtn, { margin: 15 }]}>
-              <FontAwesomeIcon
-                size={14}
-                icon={faUpload}
-                style={{
-                  color: myColors.dark,
-                }}
-              />
-            </View>
+            {imageLoading ? (
+              <ActivityIndicator size={"large"} color={myColors.light} />
+            ) : (
+              <TouchableOpacity
+                style={[styles.uploadBtn, { margin: 15 }]}
+                onPress={() => showImagePicker()}
+              >
+                <FontAwesomeIcon
+                  size={14}
+                  icon={faUpload}
+                  style={{
+                    color: "white",
+                  }}
+                />
+              </TouchableOpacity>
+            )}
           </ImageBackground>
           <View>
             <Text style={styles.fullName}>
@@ -1322,11 +1403,19 @@ const styles = StyleSheet.create({
     backgroundColor: myColors.lightGreen,
     elevation: 20,
     overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
   },
   uploadBtn: {
     position: "absolute",
-    top: "10%",
-    right: "10%",
+    bottom: "-2%",
+    // right: "30%",
+    width: 50,
+    backgroundColor: myColors.transDark,
+    padding: 5,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center"
   },
   settingItems: {
     alignItems: "center",
