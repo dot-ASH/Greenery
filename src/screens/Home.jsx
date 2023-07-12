@@ -62,6 +62,7 @@ export const Home = ({ navigation }) => {
   }, [askedQue]);
 
   plants.sort((a, b) => a.id - b.id);
+  let popular = plants?.sort((a, b) => b.score - a.score);
 
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -640,7 +641,7 @@ export const Home = ({ navigation }) => {
               </View>
               <View style={styles.sectionContentContainer}>
                 {plants ? (
-                  plants.slice(0, 2).map((item, key) => {
+                  popular.slice(0, 4).map((item, key) => {
                     return (
                       <View style={styles.sectionContent} key={key}>
                         <ImageBackground
@@ -692,7 +693,7 @@ export const Home = ({ navigation }) => {
               </View>
               <View style={styles.sectionContentContainer}>
                 {plants ? (
-                  plants.map((item, key) => {
+                  plants.slice(0, 8).map((item, key) => {
                     return (
                       <View style={styles.sectionContent} key={key}>
                         <ImageBackground
@@ -735,6 +736,26 @@ export const Home = ({ navigation }) => {
                     <ActivityIndicator size={"large"} color={myColors.light} />
                   </View>
                 )}
+                <TouchableOpacity
+                  style={{
+                    elevation: 10,
+                    width: "100%",
+                    justifyContent: "center",
+                    marginVertical: 10,
+                  }}
+                  onPress={() => {
+                    changeScreen("Search");
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.supportButtonText,
+                      { width: 150, fontSize: 18, borderRadius: 10 },
+                    ]}
+                  >
+                    Explore more
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
             {/* SUPPORT */}

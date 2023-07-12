@@ -1377,7 +1377,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
   },
   profileBanner: {
-    backgroundColor: myColors.dark,
+    backgroundColor: myColors.darkAlt,
     top: 0,
     height: 350,
     width: Dimensions.get("window").width,
