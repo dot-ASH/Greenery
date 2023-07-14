@@ -750,7 +750,7 @@ export const Home = ({ navigation }) => {
                   <Text
                     style={[
                       styles.supportButtonText,
-                      { width: 150, fontSize: 18, borderRadius: 10 },
+                      { width: 150, fontSize: 18, borderRadius: 15 },
                     ]}
                   >
                     Explore more

@@ -210,33 +210,50 @@ export const Product = ({ navigation, route }) => {
       />
 
       {compLoading ? (
-      <View
-        style={{
-          flex: 1,
-          zIndex: 8000,
-          position: "absolute",
-          width: Dimensions.get("window").width,
-          height: Dimensions.get("window").height + 80,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: myColors.darkAlt,
-            color: myColors.light,
-            height: 200,
-            width: 250,
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 15
-          }}
-        >
-          <ActivityIndicator size={"large"} color={myColors.light} />
+        // <View
+        //   style={{
+        //     flex: 1,
+        //     zIndex: 8000,
+        //     position: "absolute",
+        //     width: Dimensions.get("window").width,
+        //     height: Dimensions.get("window").height + 80,
+        //     justifyContent: "center",
+        //     alignItems: "center",
+        //   }}
+        // >
+        //   <View
+        //     style={{
+        //       backgroundColor: myColors.darkAlt,
+        //       color: myColors.light,
+        //       height: 200,
+        //       width: 250,
+        //       justifyContent: "center",
+        //       alignItems: "center",
+        //       borderRadius: 15
+        //     }}
+        //   >
+        //     <ActivityIndicator size={"large"} color={myColors.light} />
+        //   </View>
+        // </View>
+        <View style={[styles.filterContainer, { opacity: 0.8 }]}>
+          <View
+            style={{
+              width: 300,
+              height: 200,
+              backgroundColor: "white",
+              borderRadius: 15,
+              alignItems: "center",
+              padding: 20,
+              justifyContent: "center",
+            }}
+          >
+            <ActivityIndicator
+              size={"large"}
+              color={myColors.darkAlt}
+            ></ActivityIndicator>
+          </View>
         </View>
-      </View>
       ) : null}
-      
 
       <SafeAreaView style={styles.container}>
         <TouchableOpacity
@@ -803,5 +820,16 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
     textAlign: "center",
+  },
+  filterContainer: {
+    position: "absolute",
+    flex: 1,
+    backgroundColor: myColors.transDark,
+    top: 0,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height + 80,
+    zIndex: 8000,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

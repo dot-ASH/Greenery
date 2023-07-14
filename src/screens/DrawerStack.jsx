@@ -24,22 +24,24 @@ import { Cart } from "./Cart";
 import { Search } from "./Search";
 import { supabase } from "../data/Supabase";
 
+
 export const DrawerStack = ({ navigation, route }) => {
   const [activeScreen, setActiveScreen] = useState("");
   const [userId, setUserId] = useState();
   const [alreadyAdded, setAlreadyAdded] = useState(false);
   const [cartCount, setCartCount] = useState();
 
+
   useEffect(() => {
     if (route.params.active) {
       setActiveScreen("");
     }
   });
-
   const changeScreen = (screen) => {
-    route.params.active = "";
-    navigation.push(screen);
-    setActiveScreen(screen);
+      route.params.active = "";
+      navigation.push(screen);
+      setActiveScreen(screen);
+
   };
 
   const getUID = async () => {
@@ -142,7 +144,6 @@ export const DrawerStack = ({ navigation, route }) => {
                 : styles.secondaryBtn
             }
           >
-  
             <FontAwesomeIcon
               size={26}
               icon={faCartShopping}
@@ -250,5 +251,6 @@ const styles = StyleSheet.create({
   activeSecondaryBtnText: {
     alignSelf: "center",
     color: myColors.dark,
+    elevation: 10,
   },
 });
