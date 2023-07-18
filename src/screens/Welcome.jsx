@@ -1,18 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   SafeAreaView,
   Text,
   StyleSheet,
   View,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { myColors } from "../styles/Colors";
 import { Image } from "expo-image";
-import { StatusBar } from "expo-status-bar";
+import { BackHandler } from "react-native";
 
 export const Welcome = ({ navigation }) => {
+  const handleDefault = () => {
+    navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      BackHandler.exitApp();
+    });
+  };
+  useEffect(() => {
+    handleDefault();
+  }, []);
+
   return (
     <>
+      <StatusBar
+        barStyle={"dark-content"}
+        translucent
+        backgroundColor={"transparent"}
+        hidden={false}
+      />
       <SafeAreaView style={styles.container}>
         <View style={styles.welcomeView}>
           <Text style={styles.motto}>Grow Your Plant With us</Text>
@@ -89,7 +106,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 20,
     color: myColors.light,
-    fontFamily: "lusitanaBold"
+    fontFamily: "lusitanaBold",
   },
   image: {
     flex: 1,

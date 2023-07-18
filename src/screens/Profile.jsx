@@ -293,9 +293,10 @@ export const Profile = ({ navigation }) => {
       setShowAlert(true);
     }
     const { error } = await supabase.auth.signOut();
-    setTimeout(() => {
-      navigation.navigate("Login");
-    }, 1500);
+    if (!error) {
+        setShowAlert(false);
+        navigation.navigate("Welcome");
+    }
   };
 
   const handleTxtFile = () => {
@@ -1415,7 +1416,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 10,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   settingItems: {
     alignItems: "center",

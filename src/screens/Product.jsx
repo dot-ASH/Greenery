@@ -628,6 +628,7 @@ export const Product = ({ navigation, route }) => {
               gap: 20,
               borderColor: myColors.dark,
               borderWidth: 1,
+              marginBottom: 10
             }}
           >
             <TouchableOpacity onPress={likedPro}>

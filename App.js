@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet} from "react-native";
+import { StyleSheet, StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Registration } from "./src/screens/Registration";
@@ -117,14 +117,22 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
   ) : (
-    <Image
-      source={require("./assets/splash.png")}
-      style={{
-        flex: 1,
-        width: null,
-        height: null,
-      }}
-    />
+    <>
+      <StatusBar
+        barStyle={"dark-content"}
+        translucent
+        backgroundColor={"transparent"}
+        hidden={false}
+      />
+      <Image
+        source={require("./assets/splash.png")}
+        style={{
+          flex: 1,
+          width: null,
+          height: null,
+        }}
+      />
+    </>
   );
 }
 

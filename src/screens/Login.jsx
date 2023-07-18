@@ -40,6 +40,7 @@ export const Login = ({ navigation }) => {
   const [userCheck, setUserCheck] = useState(false);
   const [showEmailValid, setShowEmailValid] = useState(false);
   const [loginSucess, setLoginSuccess] = useState(null);
+  const [forgetSucess, setForgetSuccess] = useState(null);
   const [errorMssg, setErrorMssg] = useState("You Have error!");
   const [userData, setUserData] = useState([]);
 
@@ -121,6 +122,17 @@ export const Login = ({ navigation }) => {
     }
   };
 
+  const forgetPass = async () => {
+    if(email){
+      await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'http://example.com/account/update-password',
+      })
+
+    } else{
+      setForgetSuccess(false);
+    }
+  };
+
   useEffect(() => {});
 
   return (
@@ -143,9 +155,18 @@ export const Login = ({ navigation }) => {
           message={errorMssg}
         />
       ) : null}
+      {forgetSucess === false ? (
+        <CustomAlert
+          alertType="error"
+          title={"Failed!!"}
+          isVisible={forgetSucess === null ? false : true}
+          onExit={() => setForgetSuccess(null)}
+          message={"You haven't pass any email address!"}
+        />
+      ) : null}
       <View
         style={{
-          flex: 0.3,
+          flex: 0.4,
           alignContent: "center",
           alignItems: "center",
           justifyContent: "center",
@@ -155,7 +176,7 @@ export const Login = ({ navigation }) => {
       </View>
       <View
         style={{
-          flex: 0.7,
+          flex: 1,
         }}
       >
         <View>
@@ -245,15 +266,21 @@ export const Login = ({ navigation }) => {
             gap: 5,
           }}
         >
+          <TouchableOpacity onPress={() => forgetPass()}>
+            <Text style={[styles.label, { textDecorationLine: "underline" }]}>
+              Forget your password?
+            </Text>
+          </TouchableOpacity>
           <Text
             style={{
               fontFamily: "judson",
-              fontSize: 19,
+              fontSize: 21,
               color: myColors.darkAlt,
             }}
           >
-            Already have an account?
+            or, Already have an account?
           </Text>
+
           <TouchableOpacity onPress={() => navigation.navigate("Reg")}>
             <Text style={[styles.label, { textDecorationLine: "underline" }]}>
               Create a new Account

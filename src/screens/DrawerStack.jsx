@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
-  Text,
   Dimensions,
   TouchableOpacity,
+  StatusBar
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -24,13 +24,11 @@ import { Cart } from "./Cart";
 import { Search } from "./Search";
 import { supabase } from "../data/Supabase";
 
-
 export const DrawerStack = ({ navigation, route }) => {
   const [activeScreen, setActiveScreen] = useState("");
   const [userId, setUserId] = useState();
   const [alreadyAdded, setAlreadyAdded] = useState(false);
   const [cartCount, setCartCount] = useState();
-
 
   useEffect(() => {
     if (route.params.active) {
@@ -38,10 +36,9 @@ export const DrawerStack = ({ navigation, route }) => {
     }
   });
   const changeScreen = (screen) => {
-      route.params.active = "";
-      navigation.push(screen);
-      setActiveScreen(screen);
-
+    route.params.active = "";
+    navigation.push(screen);
+    setActiveScreen(screen);
   };
 
   const getUID = async () => {
@@ -88,6 +85,12 @@ export const DrawerStack = ({ navigation, route }) => {
   const Stack = createNativeStackNavigator();
   return (
     <>
+      <StatusBar
+        barStyle={"dark-content"}
+        translucent
+        backgroundColor={"transparent"}
+        hidden={false}
+      />
       <Stack.Navigator
         initialRouteName={"Home"}
         screenOptions={{ headerShown: false }}

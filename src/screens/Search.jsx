@@ -136,23 +136,36 @@ export const Search = ({ navigation }) => {
 
   async function addView(newId) {
     setLoading(true);
-    let viewedIds = await getView();
-    let index = viewedIds.indexOf(newId);
-    if (index > -1) {
-      viewedIds.splice(index, 1);
-      viewedIds.unshift(newId);
-    } else {
-      viewedIds.unshift(newId);
-    }
+    navigateProduct(newId);
     let user = await getUsers();
-    const respose = await supabase
-      .from("users")
-      .update([{ last_view: viewedIds.slice(0, 3) }])
-      .eq("id", user?.id);
-    if (respose.error) console.log(respose.error);
-    else {
-      setLoading(false);
-      navigateProduct(newId);
+    let viewedIds = await getView();
+    if (viewedIds == null) {
+      const respose = await supabase
+        .from("users")
+        .update([{ last_view: [newId] }])
+        .eq("id", user?.id);
+      if (respose.error) console.log(respose.error);
+      else {
+        setLoading(false);
+        // navigateProduct(newId);
+      }
+    } else {
+      let index = viewedIds?.indexOf(newId);
+      if (index > -1) {
+        viewedIds.splice(index, 1);
+        viewedIds.unshift(newId);
+      } else {
+        viewedIds.unshift(newId);
+      }
+      const respose = await supabase
+        .from("users")
+        .update([{ last_view: viewedIds.slice(0, 3) }])
+        .eq("id", user?.id);
+      if (respose.error) console.log(respose.error);
+      else {
+        setLoading(false);
+        // navigateProduct(newId);
+      }
     }
   }
 
@@ -276,7 +289,7 @@ export const Search = ({ navigation }) => {
       ) : null}
 
       {loading ? (
-        <View style={[styles.filterContainer, {opacity: 0.8}]}>
+        <View style={[styles.filterContainer, { opacity: 0.8 }]}>
           <View
             style={{
               width: 300,
@@ -285,10 +298,13 @@ export const Search = ({ navigation }) => {
               borderRadius: 15,
               alignItems: "center",
               padding: 20,
-              justifyContent: "center"
+              justifyContent: "center",
             }}
           >
-            <ActivityIndicator size={"large"} color={myColors.darkAlt}></ActivityIndicator>
+            <ActivityIndicator
+              size={"large"}
+              color={myColors.darkAlt}
+            ></ActivityIndicator>
           </View>
         </View>
       ) : null}
@@ -399,9 +415,6 @@ export const Search = ({ navigation }) => {
                               ]}
                               onPress={() => {
                                 addView(item.id);
-                                // navigation.navigate("product", {
-                                //   id: item.id,
-                                // });
                               }}
                             >
                               <View
@@ -480,6 +493,7 @@ export const Search = ({ navigation }) => {
                           gap: 20,
                           flex: 1,
                         }}
+                        onPress={() => addView(item.id)}
                       >
                         <Image
                           source={item.image_url}
