@@ -753,7 +753,7 @@ export const Home = ({ navigation }) => {
                       { width: 150, fontSize: 18, borderRadius: 15 },
                     ]}
                   >
-                    Explore more
+                    Find more
                   </Text>
                 </TouchableOpacity>
               </View>
