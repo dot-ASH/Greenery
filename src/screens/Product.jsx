@@ -30,8 +30,7 @@ import {
   faHeart as faHeartSolid,
 } from "@fortawesome/free-solid-svg-icons";
 import { faHeart, faSun } from "@fortawesome/free-regular-svg-icons";
-import { BackHandler } from "react-native";
-import { CheckBox } from "react-native-elements";
+import GestureRecognizer from "react-native-swipe-gestures";
 
 if (
   Platform.OS === "android" &&
@@ -83,21 +82,15 @@ export const Product = ({ navigation, route }) => {
     console.log(route.params.id);
   }, [route.params.id]);
 
-  useEffect(() => {
-    handleDefault();
-  }, [elavatedBg]);
+  // useEffect(() => {
+  //   handleDefault();
+  // }, [elavatedBg]);
 
   useEffect(() => {
     getPlant();
     shrinkFull();
     setLiked(false);
   }, [route.params.id]);
-
-  // useEffect(() => {
-  //   if (plant) {
-  //     setCompLoading(false);
-  //   }
-  // }, [plant]);
 
   async function getPlant() {
     setCompLoading(true);
@@ -145,15 +138,15 @@ export const Product = ({ navigation, route }) => {
     }
   };
 
-  const handleDefault = () => {
-    navigation.addListener("beforeRemove", (e) => {
-      if (elavatedBg === false) {
-        return;
-      }
-      e.preventDefault();
-    });
-    // shrinkFull();
-  };
+  // const handleDefault = () => {
+  //   navigation.addListener("beforeRemove", (e) => {
+  //     if (elavatedBg === false) {
+  //       return;
+  //     }
+  //     e.preventDefault();
+  //   });
+  //   // shrinkFull();
+  // };
 
   const shrinkFull = () => {
     setElavatedBg(false);
@@ -164,11 +157,6 @@ export const Product = ({ navigation, route }) => {
   const handleScroll = (event) => {
     const offset = event.nativeEvent.contentOffset.y;
     setScrollY(offset);
-    if (scrollY > 200) {
-      setElavatedBg(true);
-      setMargin(-330);
-      BackHandler.addEventListener("hardwareBackPress", shrinkFull);
-    }
   };
 
   const addToCart = async () => {
@@ -200,6 +188,25 @@ export const Product = ({ navigation, route }) => {
     return price - price * (amount / 100);
   };
 
+  const handleScrollUp = () => {
+    console.log("up");
+    setElavatedBg(true);
+    setMargin(-330);
+    setScrollY(573);
+  };
+
+  const handleScrollDown = () => {
+    console.log("down");
+    shrinkFull();
+    setScrollY(0);
+  };
+
+  const handleScrollBack = () => {
+    if (margin == -373) {
+      console.log("back");
+    }
+  };
+
   return (
     <>
       <StatusBar
@@ -210,31 +217,6 @@ export const Product = ({ navigation, route }) => {
       />
 
       {compLoading ? (
-        // <View
-        //   style={{
-        //     flex: 1,
-        //     zIndex: 8000,
-        //     position: "absolute",
-        //     width: Dimensions.get("window").width,
-        //     height: Dimensions.get("window").height + 80,
-        //     justifyContent: "center",
-        //     alignItems: "center",
-        //   }}
-        // >
-        //   <View
-        //     style={{
-        //       backgroundColor: myColors.darkAlt,
-        //       color: myColors.light,
-        //       height: 200,
-        //       width: 250,
-        //       justifyContent: "center",
-        //       alignItems: "center",
-        //       borderRadius: 15
-        //     }}
-        //   >
-        //     <ActivityIndicator size={"large"} color={myColors.light} />
-        //   </View>
-        // </View>
         <View style={[styles.filterContainer, { opacity: 0.8 }]}>
           <View
             style={{
@@ -285,7 +267,11 @@ export const Product = ({ navigation, route }) => {
           ></Image>
         </View>
         <View style={[styles.scrollContainer, { marginTop: margin }]}>
-          <View
+          <GestureRecognizer
+            onSwipeDown={() => handleScrollDown()}
+            onSwipeUp={() => handleScrollUp()}
+            onSwipeLeft={() => handleScrollBack()}
+            onSwipeRight={() => handleScrollBack()}
             style={{
               width: "95%",
               height: 60,
@@ -306,7 +292,8 @@ export const Product = ({ navigation, route }) => {
             >
               {plant && plant.plant_name}
             </Text>
-          </View>
+          </GestureRecognizer>
+
           <ScrollView
             style={[styles.product]}
             showsVerticalScrollIndicator={false}
@@ -613,6 +600,7 @@ export const Product = ({ navigation, route }) => {
               </View>
             </View>
           </ScrollView>
+
           <View
             style={{
               width: "95%",
@@ -628,7 +616,7 @@ export const Product = ({ navigation, route }) => {
               gap: 20,
               borderColor: myColors.dark,
               borderWidth: 1,
-              marginBottom: 10
+              marginBottom: 10,
             }}
           >
             <TouchableOpacity onPress={likedPro}>

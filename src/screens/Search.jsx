@@ -35,7 +35,7 @@ export const Search = ({ navigation }) => {
   const [searchedData, setSearchedData] = useState([]);
   const [filterScreen, setFilterScreen] = useState(false);
   const [filter, setFilter] = useState("regular");
-  const [viewedPlants, setViewedPlants] = useState([]);
+  const [viewedPlants, setViewedPlants] = useState();
   const [loading, setLoading] = useState(false);
 
   const fetchPlants = async () => {
@@ -52,7 +52,6 @@ export const Search = ({ navigation }) => {
     getViewedPlant();
   }, [plants]);
 
-  useEffect(() => {}, [viewedPlants]);
 
   const handleSearchData = (value) => {
     setSearchText(value);
@@ -147,7 +146,6 @@ export const Search = ({ navigation }) => {
       if (respose.error) console.log(respose.error);
       else {
         setLoading(false);
-        // navigateProduct(newId);
       }
     } else {
       let index = viewedIds?.indexOf(newId);
@@ -164,7 +162,7 @@ export const Search = ({ navigation }) => {
       if (respose.error) console.log(respose.error);
       else {
         setLoading(false);
-        // navigateProduct(newId);
+  
       }
     }
   }
@@ -472,46 +470,28 @@ export const Search = ({ navigation }) => {
                 width: "100%",
               }}
             >
-              {viewedPlants?.length > 0 ? (
-                viewedPlants.map((item) => {
-                  return (
-                    <View
-                      style={{
-                        backgroundColor: myColors.dark,
-                        borderRadius: 20,
-                        height: 120,
-                        width: 100,
-                        elevation: 5,
-                      }}
-                      key={item.id}
-                    >
-                      <TouchableOpacity
-                        style={{
-                          backgroundColor: myColors.dark,
-                          zIndex: 1000,
-                          borderRadius: 20,
-                          gap: 20,
-                          flex: 1,
-                        }}
-                        onPress={() => addView(item.id)}
-                      >
-                        <Image
-                          source={item.image_url}
-                          style={{
-                            flex: 1,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            borderRadius: 20,
-                            elevation: 10,
-                          }}
-                          contentFit="cover"
-                          transition={1000}
-                        ></Image>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })
-              ) : (
+              {viewedPlants == undefined ? (
+                <View style={{ opacity: 0.8 }}>
+                  <View
+                    style={{
+                      width: 100,
+                      height: 130,
+                      backgroundColor: myColors.lightGreen,
+                      borderRadius: 15,
+                      alignItems: "center",
+                      padding: 20,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActivityIndicator
+                      size={"large"}
+                      color={myColors.darkAlt}
+                    ></ActivityIndicator>
+                  </View>
+                </View>
+              ) : null}
+
+              {viewedPlants && viewedPlants.length == 0 ? (
                 <Text
                   style={{
                     marginVertical: 30,
@@ -524,7 +504,48 @@ export const Search = ({ navigation }) => {
                 >
                   You haven't searched anything yet.
                 </Text>
-              )}
+              ) : null}
+
+              {viewedPlants
+                ? viewedPlants.map((item) => {
+                    return (
+                      <View
+                        style={{
+                          backgroundColor: myColors.dark,
+                          borderRadius: 20,
+                          height: 120,
+                          width: 100,
+                          elevation: 5,
+                        }}
+                        key={item.id}
+                      >
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: myColors.dark,
+                            zIndex: 1000,
+                            borderRadius: 20,
+                            gap: 20,
+                            flex: 1,
+                          }}
+                          onPress={() => addView(item.id)}
+                        >
+                          <Image
+                            source={item.image_url}
+                            style={{
+                              flex: 1,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              borderRadius: 20,
+                              elevation: 10,
+                            }}
+                            contentFit="cover"
+                            transition={1000}
+                          ></Image>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })
+                :  null}
             </View>
           </View>
         </View>

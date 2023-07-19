@@ -4,7 +4,7 @@ import {
   View,
   Dimensions,
   TouchableOpacity,
-  StatusBar
+  StatusBar,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -29,6 +29,7 @@ export const DrawerStack = ({ navigation, route }) => {
   const [userId, setUserId] = useState();
   const [alreadyAdded, setAlreadyAdded] = useState(false);
   const [cartCount, setCartCount] = useState();
+  const [disabledButton, setDisabledButton] = useState("home");
 
   useEffect(() => {
     if (route.params.active) {
@@ -37,7 +38,7 @@ export const DrawerStack = ({ navigation, route }) => {
   });
   const changeScreen = (screen) => {
     route.params.active = "";
-    navigation.push(screen);
+    navigation.navigate(screen);
     setActiveScreen(screen);
   };
 
@@ -110,6 +111,7 @@ export const DrawerStack = ({ navigation, route }) => {
                 ? styles.activeSecondaryBtn
                 : styles.secondaryBtn
             }
+            disabled={activeScreen == "Home" ? true : false}
           >
             <FontAwesomeIcon
               size={26}
@@ -128,6 +130,7 @@ export const DrawerStack = ({ navigation, route }) => {
                 ? styles.activeSecondaryBtn
                 : styles.secondaryBtn
             }
+            disabled={activeScreen == "Search" ? true : false}
           >
             <FontAwesomeIcon
               size={26}
@@ -146,6 +149,7 @@ export const DrawerStack = ({ navigation, route }) => {
                 ? styles.activeSecondaryBtn
                 : styles.secondaryBtn
             }
+            disabled={activeScreen == "Cart" ? true : false}
           >
             <FontAwesomeIcon
               size={26}
@@ -164,6 +168,7 @@ export const DrawerStack = ({ navigation, route }) => {
                 ? styles.activeSecondaryBtn
                 : styles.secondaryBtn
             }
+            disabled={activeScreen == "Saved" ? true : false}
           >
             <FontAwesomeIcon
               size={26}
@@ -182,6 +187,7 @@ export const DrawerStack = ({ navigation, route }) => {
                 ? styles.activeSecondaryBtn
                 : styles.secondaryBtn
             }
+            disabled={activeScreen == "Profile" ? true : false}
           >
             <FontAwesomeIcon
               size={28}

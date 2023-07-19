@@ -114,10 +114,15 @@ export const Order = ({ navigation, route }) => {
         });
         if (!error) {
           setShowAlert(false);
-          navigation.goBack();
+          changeScreen("Cart");
         }
       } else console.log(error);
     }
+  };
+
+  const changeScreen = (screen) => {
+    navigation.navigate(screen);
+    navigation.navigate("Drawerstack", { active: screen });
   };
 
   return (

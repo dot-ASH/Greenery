@@ -261,9 +261,9 @@ export const Cart = ({ navigation }) => {
     });
   }
 
-  async function deleteIt(){
+  async function deleteIt() {
     const { error } = await supabase.from("order").delete().eq("id", orderId);
-    if(!error){
+    if (!error) {
       setCanclePrompt(false);
     }
   }
@@ -348,6 +348,35 @@ export const Cart = ({ navigation }) => {
                 ]}
               >
                 <ActivityIndicator size={"large"} color={myColors.light} />
+              </View>
+            ) : null}
+            {isThisCart && plants?.length == 0 ? (
+              <View
+                style={[
+                  {
+                    backgroundColor: myColors.lightGreen,
+                    width: "100%",
+                    padding: 10,
+                    flexDirection: "row",
+                    height: 100,
+                    shadowColor: "black",
+                    paddingVertical: 20,
+                    borderRadius: 10,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    textAlign: "center",
+                    alignSelf: "center",
+                    fontFamily: "lusitana",
+                    fontSize: 22,
+                  }}
+                >
+                  You have no items in cart!
+                </Text>
               </View>
             ) : null}
             <ScrollView
@@ -601,7 +630,7 @@ export const Cart = ({ navigation }) => {
                               borderColor: myColors.dark,
                               borderWidth: 0.5,
                               opacity: 0.8,
-                              flexWrap: "wrap"
+                              flexWrap: "wrap",
                             }}
                           >
                             Id: {item.id}
@@ -615,7 +644,6 @@ export const Cart = ({ navigation }) => {
                                 paddingVertical: 10,
                                 gap: 15,
                                 justifyContent: "space-between",
-
                               },
                             ]}
                           >
@@ -623,7 +651,7 @@ export const Cart = ({ navigation }) => {
                               style={{
                                 fontFamily: "judsonBold",
                                 fontSize: 26,
-                                textDecorationLine: "underline"
+                                textDecorationLine: "underline",
                               }}
                             >
                               {key + 1}
@@ -636,7 +664,6 @@ export const Cart = ({ navigation }) => {
                                 fontSize: 20,
                                 textAlign: "center",
                                 width: 200,
-
                               }}
                             >
                               {item.details}
@@ -732,8 +759,8 @@ export const Cart = ({ navigation }) => {
                               <TouchableOpacity
                                 onPress={() => {
                                   setOrderId(item.id);
-                                  setCanclePrompt(true)}
-                                }
+                                  setCanclePrompt(true);
+                                }}
                               >
                                 <FontAwesomeIcon
                                   size={24}

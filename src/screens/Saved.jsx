@@ -317,6 +317,64 @@ export const Saved = ({ navigation }) => {
               <ActivityIndicator size={"large"} color={myColors.light} />
             </View>
           ) : null}
+          {isThisSaved && plants?.length == 0 ? (
+            <View
+              style={[
+                {
+                  backgroundColor: myColors.lightGreen,
+                  width: "100%",
+                  padding: 10,
+                  flexDirection: "row",
+                  height: 100,
+                  shadowColor: "black",
+                  paddingVertical: 20,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  alignSelf: "center",
+                  fontFamily: "lusitana",
+                  fontSize: 22,
+                }}
+              >
+                You havn't saved anything!
+              </Text>
+            </View>
+          ) : null}
+          {!isThisSaved && owned?.length == 0 ? (
+            <View
+              style={[
+                {
+                  backgroundColor: myColors.lightGreen,
+                  width: "100%",
+                  padding: 10,
+                  flexDirection: "row",
+                  height: 100,
+                  shadowColor: "black",
+                  paddingVertical: 20,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+              ]}
+            >
+              <Text
+                style={{
+                  textAlign: "center",
+                  alignSelf: "center",
+                  fontFamily: "lusitana",
+                  fontSize: 22,
+                }}
+              >
+                You havn't owned anything!
+              </Text>
+            </View>
+          ) : null}
           <View
             style={{
               height: "100%",
