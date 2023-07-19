@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { myColors } from "../styles/Colors";
 import { Text } from "react-native";
@@ -77,20 +78,20 @@ export const Order = ({ navigation, route }) => {
     } else {
       setShowAlert(true);
       let description = "";
-      let plantsId=[];
+      let plantsId = [];
 
-      cartItems?.forEach(async(element) => {
+      cartItems?.forEach(async (element) => {
         description =
           description + `${element.amount} ${element.product_id.plant_name}, `;
-          plantsId.push(element.product_id.id)
-          let totalScore = element.product_id.score + 1;
-          const { data, error } = await supabase
+        plantsId.push(element.product_id.id);
+        let totalScore = element.product_id.score + 1;
+        const { data, error } = await supabase
           .from("plant")
           .update({ score: totalScore })
           .eq("id", element.product_id.id);
         if (error) console.log(error);
       });
-      console.log(plantsId)
+      console.log(plantsId);
       const { data, error } = await supabase
         .from("order")
         .insert([
@@ -100,7 +101,7 @@ export const Order = ({ navigation, route }) => {
             totalAmount: amount,
             status: "processing",
             pay_method: dropdown,
-            plants_id: plantsId
+            plants_id: plantsId,
           },
         ])
         .select();
@@ -263,7 +264,7 @@ export const Order = ({ navigation, route }) => {
               }}
             >
               <ScrollView>
-                {cartItems &&
+                {cartItems ? (
                   cartItems.map((item) => {
                     return (
                       <View
@@ -283,12 +284,12 @@ export const Order = ({ navigation, route }) => {
                           <Text
                             style={{ fontFamily: "lusitana", fontSize: 18 }}
                           >
-                            {item?.amount}x
+                            {item.amount}x
                           </Text>
                           <Text
                             style={{ fontFamily: "lusitanaBold", fontSize: 18 }}
                           >
-                            {item?.product_id.plant_name}
+                            {item.product_id.plant_name}
                           </Text>
                         </View>
                         <Text
@@ -299,11 +300,30 @@ export const Order = ({ navigation, route }) => {
                             textAlign: "center",
                           }}
                         >
-                          ${item?.totalAmount?.toFixed(2)}
+                          ${item.totalAmount?.toFixed(2)}
                         </Text>
                       </View>
                     );
-                  })}
+                  })
+                ) : (
+                  <View style={[styles.filterContainer, { opacity: 0.8 }]}>
+                    <View
+                      style={{
+                        width: 300,
+                        height: 200,
+                        borderRadius: 15,
+                        alignItems: "center",
+                        padding: 20,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <ActivityIndicator
+                        size={"large"}
+                        color={myColors.darkAlt}
+                      ></ActivityIndicator>
+                    </View>
+                  </View>
+                )}
               </ScrollView>
             </View>
 

@@ -82,10 +82,6 @@ export const Product = ({ navigation, route }) => {
     console.log(route.params.id);
   }, [route.params.id]);
 
-  // useEffect(() => {
-  //   handleDefault();
-  // }, [elavatedBg]);
-
   useEffect(() => {
     getPlant();
     shrinkFull();
@@ -138,16 +134,6 @@ export const Product = ({ navigation, route }) => {
     }
   };
 
-  // const handleDefault = () => {
-  //   navigation.addListener("beforeRemove", (e) => {
-  //     if (elavatedBg === false) {
-  //       return;
-  //     }
-  //     e.preventDefault();
-  //   });
-  //   // shrinkFull();
-  // };
-
   const shrinkFull = () => {
     setElavatedBg(false);
     setMargin(-20);
@@ -189,14 +175,12 @@ export const Product = ({ navigation, route }) => {
   };
 
   const handleScrollUp = () => {
-    console.log("up");
     setElavatedBg(true);
     setMargin(-330);
     setScrollY(573);
   };
 
   const handleScrollDown = () => {
-    console.log("down");
     shrinkFull();
     setScrollY(0);
   };
@@ -250,7 +234,7 @@ export const Product = ({ navigation, route }) => {
             opacity: 0.5,
           }}
           onPress={() => {
-            navigation.push("Drawerstack");
+            navigation.goBack();
           }}
         >
           <FontAwesomeIcon

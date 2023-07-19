@@ -50,6 +50,7 @@ export const Cart = ({ navigation }) => {
   const [canclePrompt, setCanclePrompt] = useState(false);
   const [owned, setOwned] = useState();
   const [orderId, setOrderId] = useState();
+  const [showAlert, setShowAlert] = useState(true);
 
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -268,6 +269,14 @@ export const Cart = ({ navigation }) => {
     }
   }
 
+  const checkOut = () => {
+    if (getCartItemCount() > 0) {
+      navigation.navigate("order", { total: sumOrder() });
+    } else {
+      setShowAlert(true);
+    }
+  };
+
   return (
     <>
       <SafeAreaView style={[styles.container]}>
@@ -291,6 +300,16 @@ export const Cart = ({ navigation }) => {
             message="You want to delete this order/history?"
             onCancle={() => setCanclePrompt(false)}
             onYes={() => deleteIt()}
+          />
+        ) : null}
+        {isThisCart && showAlert ? (
+          <CustomAlert
+            alertType="error"
+            title={"User Prompt"}
+            isVisible={showAlert ? true : false}
+            onExit={() => setShowAlert(false)}
+            message="You havn't selected any item!"
+            onCancle={() => setShowAlert(false)}
           />
         ) : null}
         <View
@@ -844,9 +863,7 @@ export const Cart = ({ navigation }) => {
                 flexDirection: "row",
                 gap: 20,
               }}
-              onPress={() =>
-                navigation.navigate("order", { total: sumOrder() })
-              }
+              onPress={() => checkOut()}
             >
               <FontAwesomeIcon
                 size={24}
