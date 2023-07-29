@@ -50,7 +50,7 @@ export const Cart = ({ navigation }) => {
   const [canclePrompt, setCanclePrompt] = useState(false);
   const [owned, setOwned] = useState();
   const [orderId, setOrderId] = useState();
-  const [showAlert, setShowAlert] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
 
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -243,7 +243,7 @@ export const Cart = ({ navigation }) => {
 
   async function ownedIt() {
     let userdata = await getUsers();
-    let orderItem = orderList?.filter(async (a) => a.id == orderId);
+    let orderItem = orderList?.filter((a) => a.id === orderId);
     orderItem[0].plants_id.forEach(async (item) => {
       let ownedItem = owned?.filter((a) => a.product_id === item);
       if (ownedItem.length === 0) {
@@ -260,6 +260,7 @@ export const Cart = ({ navigation }) => {
         if (!logText) showLogText("You already owned it/them");
       }
     });
+
   }
 
   async function deleteIt() {

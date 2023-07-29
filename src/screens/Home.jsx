@@ -46,15 +46,18 @@ export const Home = ({ navigation }) => {
 
   useEffect(() => {
     getUsers();
-    getDiscounts();
     getPlants();
-    getDiscountedPlants();
     getOwned();
   }, []);
 
   useEffect(() => {
     getOwned();
   }, [owned]);
+
+  useEffect(() => {
+    getDiscounts();
+    getDiscountedPlants();
+  }, [discounts]);
 
   useEffect(() => {
     if (askedQue) setDisabled(false);
@@ -106,15 +109,17 @@ export const Home = ({ navigation }) => {
   }
 
   async function getDiscountedPlants() {
-    const response = await supabase
-      .from("plant")
-      .select(`id, plant_name, image_url, price, discounts(amount)`)
-      .eq("discounts", 1);
+    if (typeof(discounts) != undefined) {
+      const response = await supabase
+        .from("plant")
+        .select(`id, plant_name, image_url, price`)
+        .eq("discounts", 1);
 
-    if (response.error) {
-      console.log(response.error);
-    } else {
-      setDiscountedPlants(response?.data);
+      if (response.error) {
+        console.log(response.error);
+      } else {
+        setDiscountedPlants(response?.data);
+      }
     }
   }
 
@@ -585,7 +590,7 @@ export const Home = ({ navigation }) => {
                                 {item.plant_name}
                               </Text>
                             </TouchableOpacity>
-                            {item.discounts ? (
+                            {discounts[0]?.amount ? (
                               <Text
                                 style={[
                                   styles.contentText,
@@ -599,7 +604,7 @@ export const Home = ({ navigation }) => {
                                   },
                                 ]}
                               >
-                                {item.discounts.amount} %
+                                {discounts[0].amount} %
                               </Text>
                             ) : null}
                           </ImageBackground>

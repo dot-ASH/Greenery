@@ -24,6 +24,7 @@ import {
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { addons } from "react-native";
 import { StatusBar } from "react-native";
+import { color } from "react-native-elements/dist/helpers";
 
 export const Saved = ({ navigation }) => {
   const [plants, setPlants] = useState();
@@ -111,6 +112,11 @@ export const Saved = ({ navigation }) => {
       .from("owned")
       .update({ notify: false })
       .eq("id", id);
+    if (error) console.log(error);
+  };
+
+  const deleteOwned = async (id) => {
+    const { error } = await supabase.from("owned").delete().eq("id", id);
     if (error) console.log(error);
   };
 
@@ -205,6 +211,22 @@ export const Saved = ({ navigation }) => {
           <Text style={styles.btnText}>Water your plant!</Text>
         </TouchableOpacity>
       ) : null}
+      <TouchableOpacity
+        style={{
+          backgroundColor: myColors.light,
+          elevation: 20,
+          padding: 10,
+          borderRadius: 10,
+          borderColor: myColors.light,
+          borderWidth: 0.4,
+          marginBottom: 10,
+        }}
+        onPress={() => deleteOwned(item?.id)}
+      >
+        <Text style={[styles.btnText, { color: myColors.dark }]}>
+          Remove from owned
+        </Text>
+      </TouchableOpacity>
     </View>
   );
   return (

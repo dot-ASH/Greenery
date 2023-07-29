@@ -35,13 +35,16 @@ export default function App() {
   useEffect(() => {
     auth();
 
-    if (!fontsLoaded) {
-      return undefined;
-    }
     supabase.auth.onAuthStateChange((_event, session) => {
       setAuthUser(session);
     });
   }, []);
+
+  useEffect(() => {
+    if (!fontsLoaded) {
+      setLoading(true);
+    } else setLoading(false);
+  });
 
   const auth = async () => {
     let id = await getUID();
@@ -80,7 +83,7 @@ export default function App() {
 
   console.log(redirect);
   const Stack = createNativeStackNavigator();
-  return redirect ? (
+  return redirect && !loading ? (
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName={`${redirect}`}
@@ -121,7 +124,7 @@ export default function App() {
       <StatusBar
         barStyle={"dark-content"}
         translucent
-        backgroundColor={"transparent"}
+        backgroundColor={"#E4E8D2"}
         hidden={false}
       />
       <Image

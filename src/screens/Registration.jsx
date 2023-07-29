@@ -133,8 +133,6 @@ export const Registration = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* SAMI AND SHAHIN */}
-
       {signUpSuccess === true ? (
         <CustomAlert
           alertType="success"
@@ -322,11 +320,10 @@ export const Registration = ({ navigation }) => {
                 color: myColors.darkAlt,
               }}
             >
-              Already have an account?
+              already have an account?
             </Text>
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
               <Text style={[styles.label, { textDecorationLine: "underline" }]}>
-                {" "}
                 Login
               </Text>
             </TouchableOpacity>

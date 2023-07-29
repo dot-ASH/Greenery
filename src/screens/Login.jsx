@@ -278,7 +278,7 @@ export const Login = ({ navigation }) => {
               color: myColors.darkAlt,
             }}
           >
-            or, Already have an account?
+            or, new here?
           </Text>
 
           <TouchableOpacity onPress={() => navigation.navigate("Reg")}>
