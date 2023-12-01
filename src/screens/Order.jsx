@@ -40,6 +40,7 @@ export const Order = ({ navigation, route }) => {
     }
   };
 
+
   async function getUsers() {
     let id = await getUID();
     const response = await supabase
@@ -53,6 +54,9 @@ export const Order = ({ navigation, route }) => {
       setUserData(response?.data[0]);
     }
   }
+  useEffect(() => {
+    getCartItems();
+  });
 
   const getCartItems = async () => {
     const response = await supabase
@@ -69,8 +73,7 @@ export const Order = ({ navigation, route }) => {
 
   useEffect(() => {
     getUsers();
-    getCartItems();
-  }, [cartItems]);
+  }, []);
 
   const orderNow = async (amount) => {
     if (!dropdown) {

@@ -96,7 +96,7 @@ export const Saved = ({ navigation }) => {
     let userdata = await getUsers();
     const response = await supabase
       .from("saved")
-      .select(" id ,product_id(plant_name ,image_url, price)")
+      .select(" id ,product_id(id, plant_name ,image_url, price)")
       .eq("user_id", userdata.id);
 
     if (response.error) console.log(response.error);
@@ -153,7 +153,7 @@ export const Saved = ({ navigation }) => {
       <TouchableOpacity
         onPress={() =>
           navigation.navigate("product", {
-            id: item.id,
+            id: item.product_id.id,
           })
         }
       >
@@ -229,6 +229,8 @@ export const Saved = ({ navigation }) => {
       </TouchableOpacity>
     </View>
   );
+
+  
   return (
     <>
       <StatusBar

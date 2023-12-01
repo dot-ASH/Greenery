@@ -96,7 +96,7 @@ export const Profile = ({ navigation }) => {
 
   useEffect(() => {
     getUsers();
-  }, [userData]);
+  });
 
   const onChangeHandler = (value, name) => {
     setDisabled(false);
@@ -294,8 +294,9 @@ export const Profile = ({ navigation }) => {
     }
     const { error } = await supabase.auth.signOut();
     if (!error) {
-        setShowAlert(false);
         navigation.navigate("Welcome");
+    }else{
+      console.log(error)
     }
   };
 
@@ -792,7 +793,7 @@ export const Profile = ({ navigation }) => {
                 <Text style={styles.label}>Age: </Text>
                 <TextInput
                   style={styles.textInput}
-                  value={form.age || `${userData?.age}`}
+                  value={form.age || userData?.age}
                   onChangeText={(value) => onChangeHandler(value, "age")}
                 ></TextInput>
               </View>

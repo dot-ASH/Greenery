@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, StatusBar } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Registration } from "./src/screens/Registration";
-import { Login } from "./src/screens/Login";
-import { Welcome } from "./src/screens/Welcome";
 import { useFonts } from "expo-font";
-import { DrawerStack } from "./src/screens/DrawerStack";
-import { PostSignup } from "./src/screens/PostSignup";
 import { Buffer } from "buffer";
 import { supabase } from "./src/data/Supabase";
 import { Image } from "expo-image";
-import { Notification } from "./src/screens/Notification";
+
+import { Registration } from "./src/screens/Registration";
+import { Login } from "./src/screens/Login";
+import { Welcome } from "./src/screens/Welcome";
+import { DrawerStack } from "./src/screens/DrawerStack";
+import { PostSignup } from "./src/screens/PostSignup";
 import { Product } from "./src/screens/Product";
 import { Order } from "./src/screens/Order";
 
@@ -82,6 +82,7 @@ export default function App() {
   };
 
   console.log(redirect);
+
   const Stack = createNativeStackNavigator();
   return redirect && !loading ? (
     <NavigationContainer>
@@ -102,25 +103,26 @@ export default function App() {
             gestureEnabled: false,
           }}
         />
-
         <Stack.Screen name="Reg" component={Registration} />
-        <Stack.Screen
-          name="Drawerstack"
-          component={DrawerStack}
-          initialParams={{ active: "Home" }}
-        />
         <Stack.Screen
           name="postSignup"
           component={PostSignup}
           initialParams={{ active: "Home" }}
         />
-        <Stack.Screen name="notifi" component={Notification} />
         <Stack.Screen name="product" component={Product} />
         <Stack.Screen name="order" component={Order} />
+
+          {/* DRAWERSTACK */}
+        <Stack.Screen
+          name="Drawerstack"
+          component={DrawerStack}
+          initialParams={{ active: "Home" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   ) : (
     <>
+    {/* SPLASH SCREEN ON LOAD */}
       <StatusBar
         barStyle={"dark-content"}
         translucent

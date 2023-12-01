@@ -160,13 +160,26 @@ export const Product = ({ navigation, route }) => {
   };
 
   const likedPro = async () => {
-    const { data, error } = await supabase
-      .from("saved")
-      .insert([{ product_id: route.params.id, user_id: userId.id }]);
-    if (!error) {
+    if (!liked) {
       setLiked(true);
+      const { data, error } = await supabase
+        .from("saved")
+        .insert([{ product_id: route.params.id, user_id: userId.id }]);
+      if (!error) {
+      } else {
+        console.log(error);
+      }
     } else {
-      console.log(error);
+      setLiked(false);
+      const { data, error } = await supabase
+        .from("saved")
+        .delete()
+        .eq("product_id", route.params.id)
+        .eq("user_id", userId.id);
+      if (!error) {
+      } else {
+        console.log(error);
+      }
     }
   };
 
@@ -603,7 +616,8 @@ export const Product = ({ navigation, route }) => {
               marginBottom: 10,
             }}
           >
-            <TouchableOpacity onPress={likedPro}>
+            {/* ADD TO SAVED */}
+            <TouchableOpacity onPress={() => likedPro()}>
               <FontAwesomeIcon
                 size={26}
                 icon={liked ? faHeartSolid : faHeart}
@@ -613,6 +627,8 @@ export const Product = ({ navigation, route }) => {
                 }}
               ></FontAwesomeIcon>
             </TouchableOpacity>
+
+            {/* ADD TO CART BUTTON */}
             <TouchableOpacity
               style={{
                 justifyContent: "center",

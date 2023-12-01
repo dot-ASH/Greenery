@@ -30,12 +30,15 @@ export const DrawerStack = ({ navigation, route }) => {
   const [alreadyAdded, setAlreadyAdded] = useState(false);
   const [cartCount, setCartCount] = useState();
   const [disabledButton, setDisabledButton] = useState("home");
+  
 
   useEffect(() => {
     if (route.params.active) {
       setActiveScreen("");
     }
   });
+
+
   const changeScreen = (screen) => {
     route.params.active = "";
     navigation.navigate(screen);
@@ -102,6 +105,8 @@ export const DrawerStack = ({ navigation, route }) => {
         <Stack.Screen name="Saved" component={Saved} />
         <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
+
+      {/* BOTTOM BAR */}
       <View style={styles.navbar}>
         <View style={styles.navContent}>
           <TouchableOpacity

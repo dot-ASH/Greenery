@@ -52,7 +52,6 @@ export const Search = ({ navigation }) => {
     getViewedPlant();
   }, [plants]);
 
-
   const handleSearchData = (value) => {
     setSearchText(value);
     let plantItems = plants?.slice();
@@ -162,7 +161,6 @@ export const Search = ({ navigation }) => {
       if (respose.error) console.log(respose.error);
       else {
         setLoading(false);
-  
       }
     }
   }
@@ -308,7 +306,7 @@ export const Search = ({ navigation }) => {
       ) : null}
 
       <SafeAreaView style={styles.container}>
-        {/* <Map /> */}
+        
         <View style={styles.header}>
           <View
             style={{
@@ -506,6 +504,8 @@ export const Search = ({ navigation }) => {
                 </Text>
               ) : null}
 
+              {/* VIEWED PLANT */}
+
               {viewedPlants
                 ? viewedPlants.map((item) => {
                     return (
@@ -545,7 +545,7 @@ export const Search = ({ navigation }) => {
                       </View>
                     );
                   })
-                :  null}
+                : null}
             </View>
           </View>
         </View>

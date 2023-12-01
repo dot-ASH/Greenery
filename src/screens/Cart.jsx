@@ -558,6 +558,8 @@ export const Cart = ({ navigation }) => {
             </ScrollView>
           </View>
         ) : (
+
+
           // ORDER HISTORY
           <View style={[{ flex: 1 }]}>
             {compLoading ? (
@@ -765,7 +767,7 @@ export const Cart = ({ navigation }) => {
                               {item.status === "paid" ? (
                                 <TouchableOpacity
                                   onPress={() => {
-                                    setOrderId(item.id);
+                                    setOrderId(item?.id);
                                     setOwnedPrompt(true);
                                   }}
                                 >
@@ -778,7 +780,7 @@ export const Cart = ({ navigation }) => {
                               ) : null}
                               <TouchableOpacity
                                 onPress={() => {
-                                  setOrderId(item.id);
+                                  setOrderId(item?.id);
                                   setCanclePrompt(true);
                                 }}
                               >

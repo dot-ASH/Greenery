@@ -14,6 +14,8 @@ eas.json
 .obsidian/
 .vscode/
 yarn-error.log
+*.zip
+
 
 # macOS
 .DS_Store

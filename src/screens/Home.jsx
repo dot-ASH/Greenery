@@ -64,8 +64,12 @@ export const Home = ({ navigation }) => {
     else setDisabled(true);
   }, [askedQue]);
 
+
+  
   plants.sort((a, b) => a.id - b.id);
   let popular = plants?.sort((a, b) => b.score - a.score);
+
+
 
   const getUID = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -418,6 +422,7 @@ export const Home = ({ navigation }) => {
                       alignItems: "center",
                       justifyContent: "center",
                     }}
+                    onPress={() => changeScreen("Search")}
                   >
                     <FontAwesomeIcon
                       style={{ color: myColors.light }}

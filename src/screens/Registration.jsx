@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { myColors } from "../styles/Colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { supabase } from "../data/Supabase";
 import { faEye } from "@fortawesome/free-regular-svg-icons";
 import {
@@ -68,7 +67,8 @@ export const Registration = ({ navigation }) => {
     });
 
     if (response.error) {
-      setErrorMssg(error.message);
+      console.log(response.error)
+      setErrorMssg(response.error);
       LayoutAnimation.configureNext({
         duration: 250,
         create: { type: "linear", property: "opacity" },
